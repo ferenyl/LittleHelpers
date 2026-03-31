@@ -33,19 +33,19 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
-          cache-dependency-path: LittleHelpers.Web/ClientApp/package-lock.json
+          cache-dependency-path: LittleHelpers.Web/package-lock.json
 
       - name: Install npm dependencies
         run: npm ci
-        working-directory: LittleHelpers.Web/ClientApp
+        working-directory: LittleHelpers.Web
 
       - name: Angular build (verify)
         run: npx ng build --configuration production
-        working-directory: LittleHelpers.Web/ClientApp
+        working-directory: LittleHelpers.Web
 
       - name: Angular tests
         run: npx ng test --watch=false
-        working-directory: LittleHelpers.Web/ClientApp
+        working-directory: LittleHelpers.Web
 
   publish:
     name: Build & push Docker images

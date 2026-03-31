@@ -13,7 +13,7 @@ var apiService = builder.AddProject<Projects.LittleHelpers_ApiService>("apiservi
     .WaitFor(postgres)
     .WithHttpHealthCheck("/health");
 
-builder.AddJavaScriptApp("webfrontend", "../LittleHelpers.Web/ClientApp")
+builder.AddJavaScriptApp("webfrontend", "../LittleHelpers.Web")
     .WithHttpEndpoint(port: 4500, env: "PORT")
     .WithExternalHttpEndpoints()
     .WithEnvironment("services__apiservice__http__0", apiService.GetEndpoint("http"))

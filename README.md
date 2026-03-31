@@ -38,7 +38,7 @@ LittleHelpers.sln
 ├── LittleHelpers.ServiceDefaults/# Shared Aspire service defaults (telemetry, health)
 ├── LittleHelpers.Tests/          # Unit and integration tests
 └── LittleHelpers.Web/
-    └── ClientApp/                # Angular app (src/app/{core,features,shared})
+    # Angular app (src/app/{core,features,shared})
 ```
 
 ---
@@ -277,7 +277,7 @@ On startup, the app detects the browser language via `navigator.language`. If th
 Translation files are static JSON files served as regular assets:
 
 ```
-LittleHelpers.Web/ClientApp/public/i18n/
+LittleHelpers.Web/public/i18n/
 ├── en.json   # English (default)
 └── sv.json   # Swedish
 ```
