@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { TranslocoModule } from '@jsverse/transloco';
 import { ChildrenService, ChildSummaryDto, ChoreLogDto } from '../../core/children.service';
 import { ChoreService, ChoreDto } from '../../core/chore.service';
 
@@ -20,7 +21,7 @@ interface ExpandedData {
   selector: 'app-children-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslocoModule],
   templateUrl: './children-list.component.html',
   styleUrl: './children-list.component.scss',
 })

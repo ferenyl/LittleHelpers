@@ -266,6 +266,79 @@ All tests are in `LittleHelpers.Tests/`. The test suite uses an in-memory JWT ke
 
 ---
 
+## Translations (i18n)
+
+The frontend uses [`@jsverse/transloco`](https://jsverse.github.io/transloco/) for internationalization. Supported languages are **English** (default) and **Swedish**.
+
+### How it works
+
+On startup, the app detects the browser language via `navigator.language`. If the language starts with `sv`, Swedish is used – otherwise English is the fallback.
+
+Translation files are static JSON files served as regular assets:
+
+```
+LittleHelpers.Web/ClientApp/public/i18n/
+├── en.json   # English (default)
+└── sv.json   # Swedish
+```
+
+The files are fetched at runtime via `HttpClient`. There is no build step required when adding or editing translations.
+
+### Key structure
+
+Translations are organized by feature:
+
+| Prefix | Covers |
+|---|---|
+| `common.*` | Shared labels: loading, save, cancel, edit, delete, points |
+| `nav.*` | App name, logout button |
+| `login.*` | Login form and error messages |
+| `users.*` | User list, user form, role labels |
+| `chores.*` | Chore list, chore form, difficulty levels |
+| `children.*` | Children list view |
+| `childDetail.*` | Child detail view, allowance section, chart |
+| `months.1–12` | Month names (used in chart/history labels) |
+
+### Adding a new language
+
+1. Create `public/i18n/<code>.json` using `en.json` as a template.
+2. Register the language code in `app.config.ts`:
+
+```ts
+// in provideTransloco({ ... })
+availableLangs: ['en', 'sv', '<code>'],
+```
+
+3. Update `detectLanguage()` if you want the new language to be auto-detected:
+
+```ts
+function detectLanguage(): string {
+  const lang = navigator.language.split('-')[0];
+  return ['en', 'sv', '<code>'].includes(lang) ? lang : 'en';
+}
+```
+
+### Using translations in components
+
+In templates, use the `transloco` pipe:
+
+```html
+<p>{{ 'common.save' | transloco }}</p>
+
+<!-- With interpolation parameters -->
+<h2>{{ 'childDetail.allowance.title' | transloco: { month: translatedMonth(), year: year() } }}</h2>
+```
+
+In TypeScript (e.g. confirm dialogs), inject the service:
+
+```ts
+private transloco = inject(TranslocoService);
+
+if (!confirm(this.transloco.translate('chores.confirmDelete'))) return;
+```
+
+---
+
 ## Security notes
 
 - **JWT key**: stored in `appsettings.Development.json` locally (gitignored). In production, set via the `Jwt__Key` environment variable.

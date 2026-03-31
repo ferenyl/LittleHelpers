@@ -1,15 +1,19 @@
 <div class="page">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="mb-0">Användare</h1>
-    <a routerLink="new" class="btn btn-primary">+ Ny användare</a>
+    <h1 class="mb-0">{{ 'users.heading' | transloco }}</h1>
+    <a routerLink="new" class="btn btn-primary">{{ 'users.new' | transloco }}</a>
   </div>
 
   @if (loading()) {
-    <p class="text-muted">Laddar...</p>
+    <p class="text-muted">{{ 'common.loading' | transloco }}</p>
   } @else {
     <table class="table table-hover table-bordered">
       <thead>
-        <tr><th>Namn</th><th>Roll</th><th>Åtgärder</th></tr>
+        <tr>
+          <th>{{ 'users.table.name' | transloco }}</th>
+          <th>{{ 'users.table.role' | transloco }}</th>
+          <th>{{ 'users.table.actions' | transloco }}</th>
+        </tr>
       </thead>
       <tbody>
         @for (user of users(); track user.id) {
@@ -17,12 +21,12 @@
             <td>{{ user.username }}</td>
             <td>
               <span class="badge" [class]="user.userLevel === 'Parent' ? 'bg-purple text-white' : 'bg-success'">
-                {{ user.userLevel }}
+                {{ user.userLevel === 'Parent' ? ('users.form.roleParent' | transloco) : ('users.form.roleChild' | transloco) }}
               </span>
             </td>
             <td>
-              <a [routerLink]="[user.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">Redigera</a>
-              <button (click)="delete(user.id)" class="btn btn-sm btn-outline-danger">Ta bort</button>
+              <a [routerLink]="[user.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">{{ 'common.edit' | transloco }}</a>
+              <button (click)="delete(user.id)" class="btn btn-sm btn-outline-danger">{{ 'common.delete' | transloco }}</button>
             </td>
           </tr>
         }

@@ -1,12 +1,12 @@
 <div class="page">
-  <h1 class="mb-4">Barn</h1>
-  @if (loading()) { <p class="text-muted">Laddar...</p> } @else {
+  <h1 class="mb-4">{{ 'children.heading' | transloco }}</h1>
+  @if (loading()) { <p class="text-muted">{{ 'common.loading' | transloco }}</p> } @else {
     <table class="table table-hover table-bordered">
       <thead>
         <tr>
-          <th>Namn</th>
-          <th class="text-end">Poäng (denna månad)</th>
-          <th class="text-end">Månadspeng</th>
+          <th>{{ 'children.table.name' | transloco }}</th>
+          <th class="text-end">{{ 'children.table.monthlyPoints' | transloco }}</th>
+          <th class="text-end">{{ 'children.table.allowance' | transloco }}</th>
           <th class="text-center" style="width:2.5rem"></th>
           <th style="width:7rem"></th>
         </tr>
@@ -19,26 +19,26 @@
             <td class="text-end">
               @if (child.monthlyAllowance && child.pointsGoal) {
                 <span class="fw-bold text-success">{{ calcPayout(child) }} kr</span><br>
-                <small class="text-muted">{{ calcPct(child) }}% av {{ child.monthlyAllowance }} kr</small>
+                <small class="text-muted">{{ calcPct(child) }}% {{ 'childDetail.allowance.of' | transloco }} {{ child.monthlyAllowance }} kr</small>
               } @else { <span class="text-muted">–</span> }
             </td>
             <td class="text-center text-muted small">{{ expandedId() === child.id ? '▲' : '▼' }}</td>
             <td class="text-end pe-2">
-              <a class="btn btn-sm btn-primary" [routerLink]="['/children', child.id]" (click)="$event.stopPropagation()">Öppna →</a>
+              <a class="btn btn-sm btn-primary" [routerLink]="['/children', child.id]" (click)="$event.stopPropagation()">{{ 'children.openDetail' | transloco }}</a>
             </td>
           </tr>
           @if (expandedId() === child.id) {
             <tr>
               <td colspan="5" class="p-0">
                 @if (getExpanded(child.id); as data) {
-                  @if (data.loading) { <p class="p-3 text-muted">Laddar...</p> } @else {
+                  @if (data.loading) { <p class="p-3 text-muted">{{ 'common.loading' | transloco }}</p> } @else {
                     <div class="row g-3 p-3 bg-light">
 
-                      <!-- Senaste händelser -->
+                      <!-- Recent events -->
                       <div class="col-md-6">
-                        <h6 class="fw-semibold mb-2">Senaste händelser</h6>
+                        <h6 class="fw-semibold mb-2">{{ 'children.events.heading' | transloco }}</h6>
                         @if (data.logs.length === 0) {
-                          <p class="text-muted small">Inga händelser denna månad.</p>
+                          <p class="text-muted small">{{ 'children.events.empty' | transloco }}</p>
                         } @else {
                           <ul class="list-unstyled mb-0">
                             @for (log of data.logs.slice(0, 5); track log.id) {
@@ -46,7 +46,7 @@
                                 <span class="flex-fill">{{ log.choreName }}</span>
                                 <span class="fst-italic text-muted">{{ log.performedByName }}</span>
                                 <span class="fw-semibold" [class.text-danger]="log.points < 0" [class.text-success]="log.points > 0">
-                                  {{ log.points > 0 ? '+' : '' }}{{ log.points }} p
+                                  {{ log.points > 0 ? '+' : '' }}{{ log.points }} {{ 'common.points' | transloco }}
                                 </span>
                                 <span class="text-muted" style="min-width:80px;text-align:right">{{ log.timestamp | date:'d MMM HH:mm' }}</span>
                               </li>
@@ -55,9 +55,9 @@
                         }
                       </div>
 
-                      <!-- Graf -->
+                      <!-- Chart -->
                       <div class="col-md-6">
-                        <h6 class="fw-semibold mb-2">Graf denna månad</h6>
+                        <h6 class="fw-semibold mb-2">{{ 'children.chart.heading' | transloco }}</h6>
                         <svg class="w-100" viewBox="0 0 600 120" preserveAspectRatio="none">
                           <line x1="40" y1="80" x2="580" y2="80" stroke="#dee2e6" stroke-width="1"/>
                           <line x1="40" y1="20" x2="40" y2="80" stroke="#dee2e6" stroke-width="1"/>
@@ -73,10 +73,10 @@
                         </svg>
                       </div>
 
-                      <!-- Föräldrasysslor -->
+                      <!-- Bonus / Deduction -->
                       @if (data.parentChores.length > 0) {
                         <div class="col-12">
-                          <h6 class="fw-semibold mb-2">Bonus / Avdrag</h6>
+                          <h6 class="fw-semibold mb-2">{{ 'children.bonus.heading' | transloco }}</h6>
                           <div class="d-flex flex-wrap gap-2">
                             @for (chore of data.parentChores; track chore.id) {
                               <button
@@ -85,7 +85,7 @@
                                 [class.btn-outline-danger]="chore.points < 0"
                                 [disabled]="data.completing === chore.id"
                                 (click)="$event.stopPropagation(); completeParentChore(chore.id, child)">
-                                {{ chore.name }} ({{ chore.points > 0 ? '+' : '' }}{{ chore.points }} p)
+                                {{ chore.name }} ({{ chore.points > 0 ? '+' : '' }}{{ chore.points }} {{ 'common.points' | transloco }})
                               </button>
                             }
                           </div>

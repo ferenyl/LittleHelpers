@@ -2,13 +2,14 @@ import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { UserService } from '../../core/user.service';
 
 @Component({
   selector: 'app-user-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, TranslocoModule],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss',
 })
@@ -17,6 +18,7 @@ export class UserFormComponent implements OnInit {
   private svc = inject(UserService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   editId = signal<number | null>(null);
   loading = signal(false);
@@ -64,7 +66,7 @@ export class UserFormComponent implements OnInit {
 
     obs.subscribe({
       next: () => this.router.navigate(['/users']),
-      error: () => { this.loading.set(false); this.error.set('Något gick fel.'); },
+      error: () => { this.loading.set(false); this.error.set(this.transloco.translate('common.error')); },
     });
   }
 }

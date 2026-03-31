@@ -1,22 +1,22 @@
 <div class="page">
-  <h1 class="mb-4">{{ editId() ? 'Redigera syssla' : 'Ny syssla' }}</h1>
+  <h1 class="mb-4">{{ editId() ? ('chores.editHeading' | transloco) : ('chores.createHeading' | transloco) }}</h1>
   @if (error()) { <div class="alert alert-danger">{{ error() }}</div> }
   <form [formGroup]="form" (ngSubmit)="submit()" class="card shadow-sm p-4" style="max-width:480px">
     <div class="mb-3">
-      <label class="form-label">Namn</label>
+      <label class="form-label">{{ 'chores.form.name' | transloco }}</label>
       <input formControlName="name" type="text" class="form-control" />
     </div>
     <div class="mb-3">
-      <label class="form-label">Poäng (negativt = straff)</label>
+      <label class="form-label">{{ 'chores.form.points' | transloco }}</label>
       <input formControlName="points" type="number" class="form-control" />
     </div>
 
     <fieldset class="border rounded p-3 mb-3">
-      <legend class="float-none w-auto px-2 fs-6 text-muted">Tilldela till</legend>
+      <legend class="float-none w-auto px-2 fs-6 text-muted">{{ 'chores.form.assignTo' | transloco }}</legend>
       <div class="form-check mb-2">
         <input type="checkbox" class="form-check-input" id="chk-parents"
                [checked]="forParents()" (change)="toggleForParents($any($event.target).checked)" />
-        <label class="form-check-label" for="chk-parents">Föräldrar</label>
+        <label class="form-check-label" for="chk-parents">{{ 'chores.form.parents' | transloco }}</label>
       </div>
       @for (user of children(); track user.id) {
         <div class="form-check">
@@ -28,8 +28,8 @@
     </fieldset>
 
     <div class="d-flex gap-2">
-      <button type="submit" class="btn btn-primary" [disabled]="loading()">Spara</button>
-      <a routerLink="/chores" class="btn btn-outline-secondary">Avbryt</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">{{ 'common.save' | transloco }}</button>
+      <a routerLink="/chores" class="btn btn-outline-secondary">{{ 'common.cancel' | transloco }}</a>
     </div>
   </form>
 </div>

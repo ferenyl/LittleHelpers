@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ChoreService } from '../../core/chore.service';
 import { UserService, UserDto } from '../../core/user.service';
 
@@ -10,7 +11,7 @@ import { UserService, UserDto } from '../../core/user.service';
   selector: 'app-chore-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, TranslocoModule],
   templateUrl: './chore-form.component.html',
   styleUrl: './chore-form.component.scss',
 })
@@ -20,6 +21,7 @@ export class ChoreFormComponent implements OnInit {
   private userSvc = inject(UserService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   editId = signal<number | null>(null);
   loading = signal(false);
@@ -83,7 +85,7 @@ export class ChoreFormComponent implements OnInit {
 
     obs.subscribe({
       next: () => this.router.navigate(['/chores']),
-      error: () => { this.loading.set(false); this.error.set('Något gick fel.'); },
+      error: () => { this.loading.set(false); this.error.set(this.transloco.translate('common.error')); },
     });
   }
 }

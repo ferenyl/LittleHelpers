@@ -1,38 +1,38 @@
 <div class="page">
-  @if (loading()) { <p class="text-muted">Laddar...</p> } @else if (child(); as c) {
+  @if (loading()) { <p class="text-muted">{{ 'common.loading' | transloco }}</p> } @else if (child(); as c) {
 
     <!-- Header -->
     <div class="d-flex align-items-center gap-3 mb-4">
       <h1 class="mb-0">{{ c.username }}</h1>
       <span class="badge fs-5 px-3 py-2" [class.bg-success]="totalPoints() >= 0" [class.bg-danger]="totalPoints() < 0">
-        {{ totalPoints() }} p
+        {{ totalPoints() }} {{ 'common.points' | transloco }}
       </span>
     </div>
 
-    <!-- Månadspeng -->
+    <!-- Allowance -->
     @if (allowancePct() !== null) {
       <div class="card border-success mb-4">
         <div class="card-body">
-          <h5 class="card-title text-success">Månadspeng – {{ monthLabel() }}</h5>
+          <h5 class="card-title text-success">{{ 'childDetail.allowance.title' | transloco: { month: translatedMonth(), year: year() } }}</h5>
           <div class="d-flex justify-content-between align-items-center mb-1 small">
-            <span>{{ totalPoints() }} / {{ c.pointsGoal }} poäng</span>
+            <span>{{ totalPoints() }} / {{ c.pointsGoal }} {{ 'childDetail.allowance.points' | transloco }}</span>
             <span class="fw-bold">{{ allowancePct() }}%</span>
           </div>
           <div class="progress mb-3" style="height:10px">
             <div class="progress-bar bg-success" [style.width.%]="allowancePct()"></div>
           </div>
           <div class="d-flex align-items-baseline gap-2">
-            <span class="fs-4 fw-bold text-success">{{ allowancePayout() }} kr</span>
-            <span class="text-muted small">av {{ c.monthlyAllowance }} kr</span>
+            <span class="fs-4 fw-bold text-success">{{ allowancePayout() }} {{ 'childDetail.allowance.currency' | transloco }}</span>
+            <span class="text-muted small">{{ 'childDetail.allowance.of' | transloco }} {{ c.monthlyAllowance }} {{ 'childDetail.allowance.currency' | transloco }}</span>
           </div>
         </div>
       </div>
     }
 
-    <!-- Sysslor -->
+    <!-- Chores -->
     <div class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title">Sysslor</h5>
+        <h5 class="card-title">{{ 'childDetail.chores.heading' | transloco }}</h5>
         <div class="d-flex flex-wrap gap-2">
           @for (chore of c.assignedChores; track chore.id) {
             <button
@@ -41,18 +41,18 @@
               [class.btn-outline-danger]="chore.points < 0"
               [disabled]="completing() === chore.id"
               (click)="complete(chore.id)">
-              {{ chore.name }} <span class="badge" [class.bg-success]="chore.points >= 0" [class.bg-danger]="chore.points < 0">{{ chore.points > 0 ? '+' : '' }}{{ chore.points }} p</span>
+              {{ chore.name }} <span class="badge" [class.bg-success]="chore.points >= 0" [class.bg-danger]="chore.points < 0">{{ chore.points > 0 ? '+' : '' }}{{ chore.points }} {{ 'common.points' | transloco }}</span>
             </button>
           }
         </div>
       </div>
     </div>
 
-    <!-- Linjediagram -->
+    <!-- Chart -->
     <div class="card mb-4">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0">Poäng – {{ monthLabel() }}</h5>
+          <h5 class="card-title mb-0">{{ 'childDetail.chart.heading' | transloco: { month: translatedMonth(), year: year() } }}</h5>
           <div class="btn-group btn-group-sm">
             <button class="btn btn-outline-secondary" (click)="prevMonth()">‹</button>
             <button class="btn btn-outline-secondary" (click)="nextMonth()">›</button>
@@ -76,14 +76,14 @@
       </div>
     </div>
 
-    <!-- Historik -->
+    <!-- History -->
     <div class="card">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0">Historik</h5>
+          <h5 class="card-title mb-0">{{ 'childDetail.history.heading' | transloco }}</h5>
           @if (logs().length > 5) {
             <button class="btn btn-sm btn-outline-secondary" (click)="historyExpanded.set(!historyExpanded())">
-              {{ historyExpanded() ? 'Visa färre' : 'Visa alla (' + logs().length + ')' }}
+              {{ historyExpanded() ? ('childDetail.history.showLess' | transloco) : ('childDetail.history.showAll' | transloco: { count: logs().length }) }}
             </button>
           }
         </div>
@@ -93,13 +93,13 @@
               <span class="flex-fill">{{ log.choreName }}</span>
               <span class="fst-italic text-muted">{{ log.performedByName }}</span>
               <span class="fw-bold" [class.text-success]="log.points > 0" [class.text-danger]="log.points < 0">
-                {{ log.points > 0 ? '+' : '' }}{{ log.points }} p
+                {{ log.points > 0 ? '+' : '' }}{{ log.points }} {{ 'common.points' | transloco }}
               </span>
               <span class="text-muted" style="min-width:100px;text-align:right">{{ log.timestamp | date:'d MMM HH:mm' }}</span>
             </li>
           }
           @if (!logs().length) {
-            <li class="text-muted fst-italic">Inga sysslor den här månaden.</li>
+            <li class="text-muted fst-italic">{{ 'childDetail.history.empty' | transloco }}</li>
           }
         </ul>
       </div>

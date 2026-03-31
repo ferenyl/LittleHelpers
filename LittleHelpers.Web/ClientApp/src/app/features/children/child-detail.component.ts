@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ChildrenService, ChildSummaryDto, ChoreLogDto } from '../../core/children.service';
 import { ChoreService } from '../../core/chore.service';
 
@@ -10,7 +11,7 @@ interface DayPoint { day: number; points: number; cumulative: number; }
   selector: 'app-child-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: './child-detail.component.html',
   styleUrl: './child-detail.component.scss',
 })
@@ -18,6 +19,7 @@ export class ChildDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private childSvc = inject(ChildrenService);
   private choreSvc = inject(ChoreService);
+  private transloco = inject(TranslocoService);
 
   child = signal<ChildSummaryDto | null>(null);
   logs = signal<ChoreLogDto[]>([]);
@@ -29,9 +31,8 @@ export class ChildDetailComponent implements OnInit {
   year = signal(this.now.getFullYear());
   month = signal(this.now.getMonth() + 1);
 
-  readonly monthNames = ['Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December'];
-
-  monthLabel = computed(() => `${this.monthNames[this.month() - 1]} ${this.year()}`);
+  translatedMonth = computed(() => this.transloco.translate(`months.${this.month()}`));
+  monthLabel = computed(() => `${this.translatedMonth()} ${this.year()}`);
 
   visibleHistory = computed(() =>
     this.historyExpanded() ? this.logs() : this.logs().slice(0, 5)

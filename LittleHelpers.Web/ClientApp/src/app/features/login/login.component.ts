@@ -3,12 +3,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, TranslocoModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -16,6 +17,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private transloco = inject(TranslocoService);
 
   form = this.fb.group({
     username: ['', Validators.required],
@@ -42,7 +44,7 @@ export class LoginComponent {
       },
       error: () => {
         this.loading.set(false);
-        this.error.set('Felaktigt användarnamn eller lösenord.');
+        this.error.set(this.transloco.translate('login.error'));
       },
     });
   }
