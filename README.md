@@ -117,7 +117,7 @@ docker push ghcr.io/yourorg/littlehelpers-api:1.0.0
 
 # Run standalone (requires a running PostgreSQL)
 docker run -d \
-  -p 8080:8080 \
+  -p 80:80 \
   -e Jwt__Key="your-secret-key-min-32-characters" \
   -e SeedAdminPassword="YourAdminPassword123!" \
   -e ConnectionStrings__littlehelpers="Host=localhost;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
@@ -141,11 +141,11 @@ docker push ghcr.io/yourorg/littlehelpers-web:1.0.0
 # Run standalone (proxies /api/* to the API)
 docker run -d \
   -p 80:80 \
-  -e API_URL="http://apiservice:8080" \
+  -e API_URL="http://apiservice:80" \
   littlehelpers-web:latest
 ```
 
-The `API_URL` environment variable must point to the API service. When running both containers together, use the service name from docker-compose (`http://apiservice:8080`).
+The `API_URL` environment variable must point to the API service. When running both containers together, use the service name from docker-compose (`http://apiservice:80`).
 
 ---
 
@@ -227,7 +227,7 @@ The API seeds a default admin account at startup if it does not already exist:
 Log in at `/login` in the frontend, or call `POST /api/auth/login` directly:
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:80/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"YourAdminPassword123!"}'
 ```

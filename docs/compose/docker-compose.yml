@@ -5,7 +5,6 @@
 # (se .env.example).
 
 services:
-
   # ── PostgreSQL ──────────────────────────────────────────────────────────────
   postgres:
     image: postgres:17-alpine
@@ -44,14 +43,14 @@ services:
       # Seed-konto (skapas vid första start om det inte finns)
       SeedAdminPassword: ${SEED_ADMIN_PASSWORD}
     expose:
-      - "8080"
+      - "4100:80"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:80/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -64,10 +63,10 @@ services:
       dockerfile: Dockerfile.web
     restart: unless-stopped
     ports:
-      - "${WEB_PORT:-80}:80"
+      - "${WEB_PORT:-4200}:80"
     environment:
       # nginx.conf.template substituerar detta till proxy_pass
-      API_URL: http://apiservice:8080
+      API_URL: http://apiservice:80
     depends_on:
       apiservice:
         condition: service_healthy
