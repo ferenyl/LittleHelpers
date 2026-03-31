@@ -1,0 +1,30 @@
+# Stage 1: Restore – separerat lager för NuGet-cache
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS restore
+WORKDIR /src
+COPY LittleHelpers.ServiceDefaults/LittleHelpers.ServiceDefaults.csproj LittleHelpers.ServiceDefaults/
+COPY LittleHelpers.ApiService/LittleHelpers.ApiService.csproj LittleHelpers.ApiService/
+RUN dotnet restore LittleHelpers.ApiService/LittleHelpers.ApiService.csproj
+
+# Stage 2: Build – kopierar källkod ovanpå restore-lagret (NuGet-cache finns kvar)
+FROM restore AS build
+COPY LittleHelpers.ServiceDefaults/ LittleHelpers.ServiceDefaults/
+COPY LittleHelpers.ApiService/ LittleHelpers.ApiService/
+RUN dotnet publish LittleHelpers.ApiService/LittleHelpers.ApiService.csproj \
+ -c Release \
+ -o /app/publish \
+ /p:UseAppHost=false
+
+# Stage 3: Runtime – minimal ASP.NET-image
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+
+# Kör som icke-root
+RUN useradd --uid 1001 --no-create-home --shell /usr/sbin/nologin appuser
+USER appuser
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:80
+EXPOSE 80
+
+ENTRYPOINT ["dotnet", "LittleHelpers.ApiService.dll"]

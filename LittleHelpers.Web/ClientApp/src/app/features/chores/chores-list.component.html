@@ -1,0 +1,27 @@
+<div class="page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Sysslor</h1>
+    <a routerLink="new" class="btn btn-primary">+ Ny syssla</a>
+  </div>
+  @if (loading()) { <p class="text-muted">Laddar...</p> } @else {
+    <table class="table table-hover table-bordered">
+      <thead>
+        <tr><th>Namn</th><th>Poäng</th><th>Tilldelade</th><th>Åtgärder</th></tr>
+      </thead>
+      <tbody>
+        @for (chore of chores(); track chore.id) {
+          <tr [class.hidden-row]="chore.isHidden">
+            <td>{{ chore.name }}</td>
+            <td><span class="fw-bold" [class.text-danger]="chore.points < 0">{{ chore.points }}</span></td>
+            <td>{{ chore.assignedUserIds.length }} person(er)</td>
+            <td>
+              <a [routerLink]="[chore.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">Redigera</a>
+              <button (click)="toggleHidden(chore)" class="btn btn-sm btn-outline-secondary me-1">{{ chore.isHidden ? 'Visa' : 'Dölj' }}</button>
+              <button (click)="delete(chore.id)" class="btn btn-sm btn-outline-danger">Ta bort</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

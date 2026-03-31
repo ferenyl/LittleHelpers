@@ -1,0 +1,29 @@
+# Stage 1: Build – installera beroenden separat för bra cache-lager
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY LittleHelpers.Web/ClientApp/package.json LittleHelpers.Web/ClientApp/package-lock.json ./
+RUN npm ci --ignore-scripts
+
+# Stage 2: Kompilera Angular-appen
+FROM deps AS build
+COPY LittleHelpers.Web/ClientApp/ ./
+RUN npm run build -- --configuration=production
+
+# Stage 3: Runtime – minimal nginx-image
+FROM nginx:1.27-alpine AS runtime
+
+# envsubst finns i gettext-paketet
+RUN apk add --no-cache gettext
+
+# Nginx-konfigurationen som template (API_URL substitueras vid start)
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# Statiska filer från build-steget
+COPY --from=build /app/dist/littlehelpers-client/browser /usr/share/nginx/html
+
+# Exponera port 80
+EXPOSE 80
+
+# envsubst körs automatiskt av nginx:alpine via /docker-entrypoint.d/
+# när filer finns i /etc/nginx/templates/
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,105 @@
+<div class="page">
+  <h1 class="mb-4">Barn</h1>
+  @if (loading()) { <p class="text-muted">Laddar...</p> } @else {
+    <table class="table table-hover table-bordered">
+      <thead>
+        <tr>
+          <th>Namn</th>
+          <th class="text-end">Poäng (denna månad)</th>
+          <th class="text-end">Månadspeng</th>
+          <th class="text-center" style="width:2.5rem"></th>
+          <th style="width:7rem"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (child of children(); track child.id) {
+          <tr class="child-row" style="cursor:pointer" (click)="toggle(child)">
+            <td>{{ child.username }}</td>
+            <td class="text-end fw-semibold" [class.text-danger]="child.totalPoints < 0">{{ child.totalPoints }}</td>
+            <td class="text-end">
+              @if (child.monthlyAllowance && child.pointsGoal) {
+                <span class="fw-bold text-success">{{ calcPayout(child) }} kr</span><br>
+                <small class="text-muted">{{ calcPct(child) }}% av {{ child.monthlyAllowance }} kr</small>
+              } @else { <span class="text-muted">–</span> }
+            </td>
+            <td class="text-center text-muted small">{{ expandedId() === child.id ? '▲' : '▼' }}</td>
+            <td class="text-end pe-2">
+              <a class="btn btn-sm btn-primary" [routerLink]="['/children', child.id]" (click)="$event.stopPropagation()">Öppna →</a>
+            </td>
+          </tr>
+          @if (expandedId() === child.id) {
+            <tr>
+              <td colspan="5" class="p-0">
+                @if (getExpanded(child.id); as data) {
+                  @if (data.loading) { <p class="p-3 text-muted">Laddar...</p> } @else {
+                    <div class="row g-3 p-3 bg-light">
+
+                      <!-- Senaste händelser -->
+                      <div class="col-md-6">
+                        <h6 class="fw-semibold mb-2">Senaste händelser</h6>
+                        @if (data.logs.length === 0) {
+                          <p class="text-muted small">Inga händelser denna månad.</p>
+                        } @else {
+                          <ul class="list-unstyled mb-0">
+                            @for (log of data.logs.slice(0, 5); track log.id) {
+                              <li class="d-flex gap-2 align-items-baseline border-bottom py-1 small">
+                                <span class="flex-fill">{{ log.choreName }}</span>
+                                <span class="fst-italic text-muted">{{ log.performedByName }}</span>
+                                <span class="fw-semibold" [class.text-danger]="log.points < 0" [class.text-success]="log.points > 0">
+                                  {{ log.points > 0 ? '+' : '' }}{{ log.points }} p
+                                </span>
+                                <span class="text-muted" style="min-width:80px;text-align:right">{{ log.timestamp | date:'d MMM HH:mm' }}</span>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </div>
+
+                      <!-- Graf -->
+                      <div class="col-md-6">
+                        <h6 class="fw-semibold mb-2">Graf denna månad</h6>
+                        <svg class="w-100" viewBox="0 0 600 120" preserveAspectRatio="none">
+                          <line x1="40" y1="80" x2="580" y2="80" stroke="#dee2e6" stroke-width="1"/>
+                          <line x1="40" y1="20" x2="40" y2="80" stroke="#dee2e6" stroke-width="1"/>
+                          @for (tick of data.chartAxis.yTicks; track tick.value) {
+                            <text [attr.x]="34" [attr.y]="tick.y + 4" text-anchor="end" font-size="9" fill="#6c757d">{{ tick.value }}</text>
+                          }
+                          @for (tick of data.chartAxis.xTicks; track tick.day) {
+                            <text [attr.x]="tick.x" y="93" text-anchor="middle" font-size="9" fill="#6c757d">{{ tick.day }}</text>
+                          }
+                          @if (data.svgPath) {
+                            <path [attr.d]="data.svgPath" fill="none" stroke="#0d6efd" stroke-width="2" stroke-linejoin="round"/>
+                          }
+                        </svg>
+                      </div>
+
+                      <!-- Föräldrasysslor -->
+                      @if (data.parentChores.length > 0) {
+                        <div class="col-12">
+                          <h6 class="fw-semibold mb-2">Bonus / Avdrag</h6>
+                          <div class="d-flex flex-wrap gap-2">
+                            @for (chore of data.parentChores; track chore.id) {
+                              <button
+                                class="btn btn-sm"
+                                [class.btn-outline-success]="chore.points >= 0"
+                                [class.btn-outline-danger]="chore.points < 0"
+                                [disabled]="data.completing === chore.id"
+                                (click)="$event.stopPropagation(); completeParentChore(chore.id, child)">
+                                {{ chore.name }} ({{ chore.points > 0 ? '+' : '' }}{{ chore.points }} p)
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      }
+
+                    </div>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+</div>

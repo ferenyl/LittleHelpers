@@ -1,0 +1,26 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+  <div class="card shadow" style="min-width:360px;max-width:400px;width:100%">
+    <div class="card-body p-4">
+      <h1 class="h4 text-primary fw-bold mb-1">LittleHelpers</h1>
+      <h2 class="h6 text-muted mb-4">Logga in</h2>
+
+      @if (error()) {
+        <div class="alert alert-danger py-2">{{ error() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label">Användarnamn</label>
+          <input formControlName="username" type="text" class="form-control" autocomplete="username" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Lösenord</label>
+          <input formControlName="password" type="password" class="form-control" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100" [disabled]="loading()">
+          @if (loading()) { Loggar in… } @else { Logga in }
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

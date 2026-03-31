@@ -1,0 +1,35 @@
+<div class="page">
+  <h1 class="mb-4">{{ editId() ? 'Redigera syssla' : 'Ny syssla' }}</h1>
+  @if (error()) { <div class="alert alert-danger">{{ error() }}</div> }
+  <form [formGroup]="form" (ngSubmit)="submit()" class="card shadow-sm p-4" style="max-width:480px">
+    <div class="mb-3">
+      <label class="form-label">Namn</label>
+      <input formControlName="name" type="text" class="form-control" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Poäng (negativt = straff)</label>
+      <input formControlName="points" type="number" class="form-control" />
+    </div>
+
+    <fieldset class="border rounded p-3 mb-3">
+      <legend class="float-none w-auto px-2 fs-6 text-muted">Tilldela till</legend>
+      <div class="form-check mb-2">
+        <input type="checkbox" class="form-check-input" id="chk-parents"
+               [checked]="forParents()" (change)="toggleForParents($any($event.target).checked)" />
+        <label class="form-check-label" for="chk-parents">Föräldrar</label>
+      </div>
+      @for (user of children(); track user.id) {
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" [id]="'chk-' + user.id"
+                 [checked]="isAssigned(user.id)" (change)="toggleUser(user.id)" />
+          <label class="form-check-label" [for]="'chk-' + user.id">{{ user.username }}</label>
+        </div>
+      }
+    </fieldset>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">Spara</button>
+      <a routerLink="/chores" class="btn btn-outline-secondary">Avbryt</a>
+    </div>
+  </form>
+</div>

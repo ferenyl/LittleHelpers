@@ -1,0 +1,16 @@
+@if (auth.isLoggedIn()) {
+  <nav class="navbar navbar-expand-md navbar-dark bg-primary px-3">
+    <span class="navbar-brand fw-bold">LittleHelpers</span>
+    <ul class="navbar-nav me-auto">
+      @for (item of menuItems(); track item.route) {
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="item.route">{{ item.label }}</a>
+        </li>
+      }
+    </ul>
+    <button class="btn btn-outline-light btn-sm" (click)="logout()">Logga ut</button>
+  </nav>
+}
+<main class="py-4 px-3">
+  <router-outlet />
+</main>
