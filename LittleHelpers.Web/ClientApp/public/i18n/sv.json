@@ -1,0 +1,134 @@
+{
+  "common": {
+    "loading": "Laddar...",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "points": "p",
+    "actions": "Åtgärder",
+    "error": "Något gick fel."
+  },
+  "nav": {
+    "brand": "LittleHelpers",
+    "logout": "Logga ut"
+  },
+  "menu": {
+    "users": "Användare",
+    "chores": "Sysslor",
+    "children": "Barn"
+  },
+  "login": {
+    "title": "LittleHelpers",
+    "heading": "Logga in",
+    "username": "Användarnamn",
+    "password": "Lösenord",
+    "submitting": "Loggar in…",
+    "submit": "Logga in",
+    "error": "Felaktigt användarnamn eller lösenord."
+  },
+  "users": {
+    "heading": "Användare",
+    "new": "+ Ny användare",
+    "table": {
+      "name": "Namn",
+      "role": "Roll",
+      "actions": "Åtgärder"
+    },
+    "editHeading": "Redigera användare",
+    "createHeading": "Ny användare",
+    "form": {
+      "username": "Användarnamn",
+      "password": "Lösenord",
+      "passwordHint": "(lämna tomt för att behålla)",
+      "role": "Roll",
+      "roleChild": "Barn",
+      "roleParent": "Förälder",
+      "allowance": "Månadspeng (kr)",
+      "allowancePlaceholder": "t.ex. 200",
+      "pointsGoal": "Poängmål för full månadspeng",
+      "pointsGoalPlaceholder": "t.ex. 25"
+    },
+    "confirmDelete": "Ta bort användaren?"
+  },
+  "chores": {
+    "heading": "Sysslor",
+    "new": "+ Ny syssla",
+    "table": {
+      "name": "Namn",
+      "points": "Poäng",
+      "assigned": "Tilldelade",
+      "persons": "person(er)",
+      "actions": "Åtgärder"
+    },
+    "editHeading": "Redigera syssla",
+    "createHeading": "Ny syssla",
+    "form": {
+      "name": "Namn",
+      "points": "Poäng (negativt = straff)",
+      "assignTo": "Tilldela till",
+      "parents": "Föräldrar"
+    },
+    "edit": "Redigera",
+    "show": "Visa",
+    "hide": "Dölj",
+    "delete": "Ta bort",
+    "confirmDelete": "Ta bort sysslan?"
+  },
+  "children": {
+    "heading": "Barn",
+    "table": {
+      "name": "Namn",
+      "monthlyPoints": "Poäng (denna månad)",
+      "allowance": "Månadspeng"
+    },
+    "openDetail": "Öppna →",
+    "events": {
+      "heading": "Senaste händelser",
+      "empty": "Inga händelser denna månad.",
+      "by": "av"
+    },
+    "chart": {
+      "heading": "Graf denna månad"
+    },
+    "bonus": {
+      "heading": "Bonus / Avdrag"
+    }
+  },
+  "childDetail": {
+    "allowance": {
+      "title": "Månadspeng – {{ month }} {{ year }}",
+      "points": "poäng",
+      "of": "av",
+      "currency": "kr",
+      "payout": "Beräknad utbetalning"
+    },
+    "chores": {
+      "heading": "Sysslor"
+    },
+    "chart": {
+      "heading": "Poäng – {{ month }} {{ year }}"
+    },
+    "history": {
+      "heading": "Historik",
+      "showLess": "Visa färre",
+      "showAll": "Visa alla ({{ count }})",
+      "empty": "Inga sysslor den här månaden.",
+      "by": "av"
+    }
+  },
+  "months": {
+    "1": "Januari",
+    "2": "Februari",
+    "3": "Mars",
+    "4": "April",
+    "5": "Maj",
+    "6": "Juni",
+    "7": "Juli",
+    "8": "Augusti",
+    "9": "September",
+    "10": "Oktober",
+    "11": "November",
+    "12": "December"
+  }
+}

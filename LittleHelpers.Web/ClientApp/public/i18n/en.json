@@ -1,0 +1,134 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "points": "pts",
+    "actions": "Actions",
+    "error": "Something went wrong."
+  },
+  "nav": {
+    "brand": "LittleHelpers",
+    "logout": "Log out"
+  },
+  "menu": {
+    "users": "Users",
+    "chores": "Chores",
+    "children": "Children"
+  },
+  "login": {
+    "title": "LittleHelpers",
+    "heading": "Sign in",
+    "username": "Username",
+    "password": "Password",
+    "submitting": "Signing in…",
+    "submit": "Sign in",
+    "error": "Incorrect username or password."
+  },
+  "users": {
+    "heading": "Users",
+    "new": "+ New user",
+    "table": {
+      "name": "Name",
+      "role": "Role",
+      "actions": "Actions"
+    },
+    "editHeading": "Edit user",
+    "createHeading": "New user",
+    "form": {
+      "username": "Username",
+      "password": "Password",
+      "passwordHint": "(leave blank to keep current)",
+      "role": "Role",
+      "roleChild": "Child",
+      "roleParent": "Parent",
+      "allowance": "Monthly allowance (SEK)",
+      "allowancePlaceholder": "e.g. 200",
+      "pointsGoal": "Points goal for full allowance",
+      "pointsGoalPlaceholder": "e.g. 25"
+    },
+    "confirmDelete": "Delete this user?"
+  },
+  "chores": {
+    "heading": "Chores",
+    "new": "+ New chore",
+    "table": {
+      "name": "Name",
+      "points": "Points",
+      "assigned": "Assigned",
+      "persons": "person(s)",
+      "actions": "Actions"
+    },
+    "editHeading": "Edit chore",
+    "createHeading": "New chore",
+    "form": {
+      "name": "Name",
+      "points": "Points (negative = penalty)",
+      "assignTo": "Assign to",
+      "parents": "Parents"
+    },
+    "edit": "Edit",
+    "show": "Show",
+    "hide": "Hide",
+    "delete": "Delete",
+    "confirmDelete": "Delete this chore?"
+  },
+  "children": {
+    "heading": "Children",
+    "table": {
+      "name": "Name",
+      "monthlyPoints": "Points (this month)",
+      "allowance": "Allowance"
+    },
+    "openDetail": "Open →",
+    "events": {
+      "heading": "Recent events",
+      "empty": "No events this month.",
+      "by": "by"
+    },
+    "chart": {
+      "heading": "Chart this month"
+    },
+    "bonus": {
+      "heading": "Bonus / Deduction"
+    }
+  },
+  "childDetail": {
+    "allowance": {
+      "title": "Allowance – {{ month }} {{ year }}",
+      "points": "points",
+      "of": "of",
+      "currency": "SEK",
+      "payout": "Estimated payout"
+    },
+    "chores": {
+      "heading": "Chores"
+    },
+    "chart": {
+      "heading": "Points – {{ month }} {{ year }}"
+    },
+    "history": {
+      "heading": "History",
+      "showLess": "Show fewer",
+      "showAll": "Show all ({{ count }})",
+      "empty": "No chores this month.",
+      "by": "by"
+    }
+  },
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  }
+}
