@@ -6,7 +6,7 @@ layout {
         }
         pane size="75%" split_direction="vertical" {
             pane edit="." name="CODE" size="85%" focus=true
-            pane command="dotnet" name="Runner" cwd="LittleHelpers.AppHost" size="15%" {
+            pane command="aspire" name="Runner" cwd="LittleHelpers.AppHost" size="15%" {
                 args "run"
                 start_suspended true
             }
