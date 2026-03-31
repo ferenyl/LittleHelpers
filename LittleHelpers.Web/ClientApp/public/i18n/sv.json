@@ -16,7 +16,8 @@
   "menu": {
     "users": "Användare",
     "chores": "Sysslor",
-    "children": "Barn"
+    "children": "Barn",
+    "myChores": "Mina sysslor"
   },
   "login": {
     "title": "LittleHelpers",

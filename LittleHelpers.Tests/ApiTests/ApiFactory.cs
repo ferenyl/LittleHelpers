@@ -11,21 +11,22 @@ namespace LittleHelpers.Tests.ApiTests;
 
 public class ApiFactory : WebApplicationFactory<ApiMarker>
 {
+    // Set ASPNETCORE_ENVIRONMENT before WebApplication.CreateBuilder reads it,
+    // ensuring appsettings.Testing.json is loaded and isTesting is true.
+    static ApiFactory()
+    {
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+    }
+
     private readonly string _dbName = $"TestDb-{Guid.NewGuid()}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        // Point to the API assembly's output dir so appsettings.Testing.json is found.
+        builder.UseContentRoot(
+            Path.GetDirectoryName(typeof(ApiMarker).Assembly.Location)!);
 
-        builder.ConfigureAppConfiguration((_, config) =>
-        {
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Jwt:Key"] = JwtHelper.Key,
-                ["Jwt:Issuer"] = JwtHelper.Issuer,
-                ["Jwt:Audience"] = JwtHelper.Audience
-            });
-        });
+        builder.UseEnvironment("Testing");
 
         builder.ConfigureServices(services =>
         {

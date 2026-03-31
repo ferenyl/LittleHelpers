@@ -485,6 +485,7 @@ $RECYCLE.BIN/
 appsettings.Development.json
 appsettings.*.json
 !appsettings.json
+!appsettings.Testing.json
 
 # Angular build output
 **/ClientApp/dist/

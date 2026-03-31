@@ -4,7 +4,7 @@
     <ul class="navbar-nav me-auto">
       @for (item of menuItems(); track item.route) {
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="item.route">{{ item.label }}</a>
+          <a class="nav-link" [routerLink]="item.route">{{ item.label | transloco }}</a>
         </li>
       }
     </ul>

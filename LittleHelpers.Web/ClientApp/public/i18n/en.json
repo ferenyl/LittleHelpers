@@ -16,7 +16,8 @@
   "menu": {
     "users": "Users",
     "chores": "Chores",
-    "children": "Children"
+    "children": "Children",
+    "myChores": "My Chores"
   },
   "login": {
     "title": "LittleHelpers",

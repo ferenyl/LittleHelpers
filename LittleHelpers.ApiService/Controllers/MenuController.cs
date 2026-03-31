@@ -18,14 +18,14 @@ public class MenuController : ControllerBase
 
         if (role == "Parent")
         {
-            items.Add(new MenuItemDto("Sysslor", "/chores"));
-            items.Add(new MenuItemDto("Barn", "/children"));
-            items.Add(new MenuItemDto("Användare", "/users"));
+            items.Add(new MenuItemDto("menu.chores", "/chores"));
+            items.Add(new MenuItemDto("menu.children", "/children"));
+            items.Add(new MenuItemDto("menu.users", "/users"));
         }
 
         if (role == "Child" && userId is not null)
         {
-            items.Add(new MenuItemDto("Mina sysslor", $"/children/{userId}"));
+            items.Add(new MenuItemDto("menu.myChores", $"/children/{userId}"));
         }
 
         return Ok(items);
