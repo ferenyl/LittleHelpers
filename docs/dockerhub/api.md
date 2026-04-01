@@ -65,7 +65,7 @@ services:
   api:
     image: ferenyl/littlehelpers.api:latest
     ports:
-      - "-p 80:80"
+      - "-p 80"
     environment:
       ConnectionStrings__littlehelpers: "Host=db;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers"
       Jwt__Key: "your-secret-key-min-32-characters-long"

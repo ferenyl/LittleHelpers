@@ -7,7 +7,7 @@ Frontend for [LittleHelpers](https://github.com/ferenyl/littlehelpers) – a fam
 ```bash
 docker run -d \
   -p 80:80 \
-  -e API_URL="http://api:80" \
+  -e API_URL="http://api" \
   ferenyl/littlehelpers.web:latest
 ```
 
@@ -17,7 +17,7 @@ The `API_URL` is injected into the nginx config at container startup via `envsub
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `API_URL` | ✅ | – | Base URL of the API service, e.g. `http://api:80` |
+| `API_URL` | ✅ | – | Base URL of the API service, e.g. `http://api` |
 
 ## Ports
 
@@ -35,7 +35,7 @@ location /api/ {
 }
 ```
 
-This means `/api/auth/login` in the browser → `http://api:80/auth/login` on the server side. The API is never exposed directly to the internet.
+This means `/api/auth/login` in the browser → `http://api/auth/login` on the server side. The API is never exposed directly to the internet.
 
 ## Languages
 
@@ -50,9 +50,9 @@ services:
   web:
     image: ferenyl/littlehelpers.web:latest
     ports:
-      - "80:80"
+      - "80"
     environment:
-      API_URL: "http://api:80"
+      API_URL: "http://api"
     depends_on:
       - api
 ```
