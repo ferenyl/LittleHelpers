@@ -19,7 +19,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Kör som icke-root
-RUN useradd --uid 1001 --no-create-home --shell /usr/sbin/nologin appuser
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --uid 1001 --no-create-home --shell /usr/sbin/nologin appuser
 USER appuser
 
 COPY --from=build /app/publish .
