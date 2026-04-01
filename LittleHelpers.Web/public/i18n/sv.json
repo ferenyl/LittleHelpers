@@ -11,7 +11,11 @@
   },
   "nav": {
     "brand": "LittleHelpers",
-    "logout": "Logga ut"
+    "logout": "Logga ut",
+    "theme": "Tema",
+    "theme.system": "System",
+    "theme.light": "Ljust",
+    "theme.dark": "Mörkt"
   },
   "menu": {
     "users": "Användare",

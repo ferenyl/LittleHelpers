@@ -1,8 +1,9 @@
-import { Component, OnInit, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule } from '@jsverse/transloco';
 import { AuthService, MenuItemDto } from './core/auth.service';
+import { ThemeService, Theme } from './core/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -14,9 +15,11 @@ import { AuthService, MenuItemDto } from './core/auth.service';
 })
 export class App {
   auth = inject(AuthService);
+  themeService = inject(ThemeService);
   private router = inject(Router);
 
   menuItems = signal<MenuItemDto[]>([]);
+  themeMenuOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -30,6 +33,20 @@ export class App {
 
   logout() {
     this.auth.logout();
+  }
+
+  setTheme(theme: Theme) {
+    this.themeService.set(theme);
+    this.themeMenuOpen.set(false);
+  }
+
+  toggleThemeMenu(event: Event) {
+    event.stopPropagation();
+    this.themeMenuOpen.update(v => !v);
+  }
+
+  closeThemeMenu() {
+    this.themeMenuOpen.set(false);
   }
 }
 

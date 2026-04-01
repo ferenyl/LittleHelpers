@@ -11,7 +11,11 @@
   },
   "nav": {
     "brand": "LittleHelpers",
-    "logout": "Log out"
+    "logout": "Log out",
+    "theme": "Theme",
+    "theme.system": "System",
+    "theme.light": "Light",
+    "theme.dark": "Dark"
   },
   "menu": {
     "users": "Users",
