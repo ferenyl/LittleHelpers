@@ -14,3 +14,15 @@ const localStorageMock = (() => {
 })();
 
 vi.stubGlobal('localStorage', localStorageMock);
+
+// Provide a browser-like matchMedia for Vitest/jsdom
+vi.stubGlobal('matchMedia', (query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: () => {},
+  removeListener: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => false,
+}));
