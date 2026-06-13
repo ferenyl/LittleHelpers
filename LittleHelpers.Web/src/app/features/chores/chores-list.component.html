@@ -9,6 +9,8 @@
         <tr>
           <th>{{ 'chores.table.name' | transloco }}</th>
           <th>{{ 'chores.table.points' | transloco }}</th>
+          <th>{{ 'chores.table.dayLimit' | transloco }}</th>
+          <th>{{ 'chores.table.weekLimit' | transloco }}</th>
           <th>{{ 'chores.table.assigned' | transloco }}</th>
           <th>{{ 'chores.table.actions' | transloco }}</th>
         </tr>
@@ -18,6 +20,8 @@
           <tr [class.hidden-row]="chore.isHidden">
             <td>{{ chore.name }}</td>
             <td><span class="fw-bold" [class.text-danger]="chore.points < 0">{{ chore.points }}</span></td>
+            <td>{{ dayLimitLabel(chore) }}</td>
+            <td>{{ weekLimitLabel(chore) }}</td>
             <td>{{ chore.assignedUserIds.length }} {{ 'chores.table.persons' | transloco }}</td>
             <td>
               <a [routerLink]="[chore.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">{{ 'chores.edit' | transloco }}</a>

@@ -34,4 +34,24 @@ export class ChoresListComponent implements OnInit {
     if (!confirm(this.transloco.translate('chores.confirmDelete'))) return;
     this.svc.delete(id).subscribe(() => this.chores.update(c => c.filter(x => x.id !== id)));
   }
+
+  dayLimitLabel(chore: ChoreDto) {
+    if (chore.minDaysBetween) {
+      return this.transloco.translate('chores.table.minDaysBetweenValue', { count: chore.minDaysBetween });
+    }
+
+    if (chore.maxTimesPerDay) {
+      return this.transloco.translate('chores.table.maxTimesPerDayValue', { count: chore.maxTimesPerDay });
+    }
+
+    return '—';
+  }
+
+  weekLimitLabel(chore: ChoreDto) {
+    if (!chore.maxTimesPerWeek) {
+      return '—';
+    }
+
+    return this.transloco.translate('chores.table.maxTimesPerWeekValue', { count: chore.maxTimesPerWeek });
+  }
 }

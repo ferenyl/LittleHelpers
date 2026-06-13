@@ -48,7 +48,30 @@ builder.Services.AddAuthorizationBuilder()
         .Build());
 
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserRepository, EfUserRepository>();
+builder.Services.AddScoped<IChildRepository, EfChildRepository>();
+builder.Services.AddScoped<IChoreRepository, EfChoreRepository>();
+builder.Services.AddScoped<IChoreLogRepository, EfChoreLogRepository>();
+builder.Services.AddScoped<IChoreAvailabilityService, ChoreAvailabilityService>();
+builder.Services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
+builder.Services.AddDecoratedQueryHandler<GetUsersQuery, IReadOnlyList<UserDto>, GetUsersQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetUserByIdQuery, UserDto, GetUserByIdQueryHandler>();
+builder.Services.AddDecoratedCommandHandler<CreateUserCommand, UserDto, CreateUserCommandHandler>();
+builder.Services.AddDecoratedCommandHandler<UpdateUserCommand, UserDto, UpdateUserCommandHandler>();
+builder.Services.AddDecoratedCommandHandler<DeleteUserCommand, Unit, DeleteUserCommandHandler>();
+builder.Services.AddDecoratedQueryHandler<LoginQuery, LoginResponse, LoginQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetMenuQuery, IReadOnlyList<MenuItemDto>, GetMenuQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetChoreLogQuery, IReadOnlyList<ChoreLogDto>, GetChoreLogQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetChildrenQuery, IReadOnlyList<ChildSummaryDto>, GetChildrenQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetChildDetailQuery, ChildSummaryDto, GetChildDetailQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetChoresQuery, IReadOnlyList<ChoreDto>, GetChoresQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetChoreByIdQuery, ChoreDto, GetChoreByIdQueryHandler>();
+builder.Services.AddDecoratedCommandHandler<CreateChoreCommand, ChoreDto, CreateChoreCommandHandler>();
+builder.Services.AddDecoratedCommandHandler<UpdateChoreCommand, ChoreDto, UpdateChoreCommandHandler>();
+builder.Services.AddDecoratedCommandHandler<DeleteChoreCommand, Unit, DeleteChoreCommandHandler>();
+builder.Services.AddDecoratedCommandHandler<CompleteChoreCommand, ChoreLogDto, CompleteChoreCommandHandler>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 

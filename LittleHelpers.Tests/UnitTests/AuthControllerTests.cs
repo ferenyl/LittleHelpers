@@ -1,9 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using LittleHelpers.ApiService.Controllers;
+using LittleHelpers.ApiService.Application.Auth;
+using LittleHelpers.ApiService.Application.Cqrs;
 using LittleHelpers.ApiService.Data;
+using LittleHelpers.ApiService.Data.Repositories;
 using LittleHelpers.ApiService.Models;
-using Microsoft.AspNetCore.Mvc;
+using LittleHelpers.ApiService.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -12,7 +14,7 @@ namespace LittleHelpers.Tests.UnitTests;
 public class AuthControllerTests : IDisposable
 {
     private readonly AppDbContext _db;
-    private readonly AuthController _controller;
+    private readonly LoginQueryHandler _handler;
 
     public AuthControllerTests()
     {
@@ -30,7 +32,7 @@ public class AuthControllerTests : IDisposable
             })
             .Build();
 
-        _controller = new AuthController(_db, config);
+        _handler = new LoginQueryHandler(new EfUserRepository(_db), config, new SystemDateTimeProvider());
 
         _db.Users.Add(new User
         {
@@ -44,35 +46,27 @@ public class AuthControllerTests : IDisposable
     [Fact]
     public async Task Login_ValidCredentials_ReturnsOkWithToken()
     {
-        var result = await _controller.Login(new("parent1", "correct-password"));
-
-        var ok = Assert.IsType<OkObjectResult>(result);
-        var response = Assert.IsAssignableFrom<dynamic>(ok.Value);
+        var response = await _handler.Handle(new LoginQuery("parent1", "correct-password"));
+        Assert.NotEmpty(response.Token);
+        Assert.Equal("parent1", response.Username);
     }
 
     [Fact]
     public async Task Login_WrongPassword_ReturnsUnauthorized()
     {
-        var result = await _controller.Login(new("parent1", "wrong-password"));
-
-        Assert.IsType<UnauthorizedObjectResult>(result);
+        await Assert.ThrowsAsync<RequestAuthenticationException>(() => _handler.Handle(new LoginQuery("parent1", "wrong-password")));
     }
 
     [Fact]
     public async Task Login_UnknownUsername_ReturnsUnauthorized()
     {
-        var result = await _controller.Login(new("nobody", "any-password"));
-
-        Assert.IsType<UnauthorizedObjectResult>(result);
+        await Assert.ThrowsAsync<RequestAuthenticationException>(() => _handler.Handle(new LoginQuery("nobody", "any-password")));
     }
 
     [Fact]
     public async Task Login_ValidCredentials_TokenContainsCorrectClaims()
     {
-        var result = await _controller.Login(new("parent1", "correct-password"));
-
-        var ok = Assert.IsType<OkObjectResult>(result);
-        var response = (LittleHelpers.ApiService.Models.LoginResponse)ok.Value!;
+        var response = await _handler.Handle(new LoginQuery("parent1", "correct-password"));
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(response.Token);

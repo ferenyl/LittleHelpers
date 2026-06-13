@@ -33,18 +33,35 @@
     <div class="card mb-4">
       <div class="card-body">
         <h5 class="card-title">{{ 'childDetail.chores.heading' | transloco }}</h5>
-        <div class="d-flex flex-wrap gap-2">
-          @for (chore of c.assignedChores; track chore.id) {
-            <button
-              class="btn"
-              [class.btn-outline-success]="chore.points >= 0"
-              [class.btn-outline-danger]="chore.points < 0"
-              [disabled]="completing() === chore.id"
-              (click)="complete(chore.id)">
-              {{ chore.name }} <span class="badge" [class.bg-success]="chore.points >= 0" [class.bg-danger]="chore.points < 0">{{ chore.points > 0 ? '+' : '' }}{{ chore.points }} {{ 'common.points' | transloco }}</span>
-            </button>
-          }
-        </div>
+        @if (availableChores().length) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (chore of availableChores(); track chore.id) {
+              <button
+                class="btn"
+                [class.btn-warning]="chore.isLimited && isParent()"
+                [class.text-dark]="chore.isLimited && isParent()"
+                [class.btn-outline-success]="!(chore.isLimited && isParent()) && chore.points >= 0"
+                [class.btn-outline-danger]="!(chore.isLimited && isParent()) && chore.points < 0"
+                [disabled]="completing() === chore.id"
+                (click)="complete(chore.id)">
+                {{ chore.name }}
+                @if (chore.isLimited && isParent()) {
+                  <span class="badge bg-dark me-1">{{ 'childDetail.chores.limitReached' | transloco }}</span>
+                }
+                <span
+                  class="badge"
+                  [class.bg-warning]="chore.isLimited && isParent()"
+                  [class.text-dark]="chore.isLimited && isParent()"
+                  [class.bg-success]="!chore.isLimited && chore.points >= 0"
+                  [class.bg-danger]="!chore.isLimited && chore.points < 0">
+                  {{ chore.points > 0 ? '+' : '' }}{{ chore.points }} {{ 'common.points' | transloco }}
+                </span>
+              </button>
+            }
+          </div>
+        } @else {
+          <p class="text-muted mb-0">{{ 'childDetail.chores.empty' | transloco }}</p>
+        }
       </div>
     </div>
 

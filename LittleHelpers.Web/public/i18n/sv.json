@@ -62,6 +62,11 @@
     "table": {
       "name": "Namn",
       "points": "Poäng",
+      "dayLimit": "Dagsgräns",
+      "weekLimit": "Veckogräns",
+      "minDaysBetweenValue": "Min {{ count }} dag(ar) mellan",
+      "maxTimesPerDayValue": "Max {{ count }} / dag",
+      "maxTimesPerWeekValue": "Max {{ count }} / vecka",
       "assigned": "Tilldelade",
       "persons": "person(er)",
       "actions": "Åtgärder"
@@ -71,6 +76,13 @@
     "form": {
       "name": "Namn",
       "points": "Poäng (negativt = straff)",
+      "frequency": "Frekvensgränser",
+      "maxTimesPerDay": "Max gånger per dag",
+      "maxTimesPerDayHint": "Hur många gånger per dag denna syssla kan göras",
+      "minDaysBetween": "Min dagar mellan",
+      "minDaysBetweenHint": "Minsta antal dagar mellan genomföranden (t.ex. 2 = varannan dag)",
+      "maxTimesPerWeek": "Max gånger per vecka",
+      "maxTimesPerWeekHint": "Hur många gånger per vecka denna syssla kan göras",
       "assignTo": "Tilldela till",
       "parents": "Föräldrar"
     },
@@ -109,7 +121,9 @@
       "payout": "Beräknad utbetalning"
     },
     "chores": {
-      "heading": "Sysslor"
+      "heading": "Sysslor",
+      "empty": "Det finns inga sysslor som går att göra just nu.",
+      "limitReached": "Limit nådd"
     },
     "chart": {
       "heading": "Poäng – {{ month }} {{ year }}"

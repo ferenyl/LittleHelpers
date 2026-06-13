@@ -33,6 +33,15 @@ namespace LittleHelpers.ApiService.Data.Migrations
                     b.Property<bool>("IsHidden")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("MaxTimesPerDay")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MaxTimesPerWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MinDaysBetween")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");

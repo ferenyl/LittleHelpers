@@ -62,6 +62,11 @@
     "table": {
       "name": "Name",
       "points": "Points",
+      "dayLimit": "Daily limit",
+      "weekLimit": "Weekly limit",
+      "minDaysBetweenValue": "Min {{ count }} day(s) between",
+      "maxTimesPerDayValue": "Max {{ count }} / day",
+      "maxTimesPerWeekValue": "Max {{ count }} / week",
       "assigned": "Assigned",
       "persons": "person(s)",
       "actions": "Actions"
@@ -71,6 +76,13 @@
     "form": {
       "name": "Name",
       "points": "Points (negative = penalty)",
+      "frequency": "Frequency limits",
+      "maxTimesPerDay": "Max times per day",
+      "maxTimesPerDayHint": "How many times per day this chore can be done",
+      "minDaysBetween": "Min days between",
+      "minDaysBetweenHint": "Minimum number of days between completions (e.g. 2 = every other day)",
+      "maxTimesPerWeek": "Max times per week",
+      "maxTimesPerWeekHint": "How many times per week this chore can be done",
       "assignTo": "Assign to",
       "parents": "Parents"
     },
@@ -109,7 +121,9 @@
       "payout": "Estimated payout"
     },
     "chores": {
-      "heading": "Chores"
+      "heading": "Chores",
+      "empty": "There are no chores you can do right now.",
+      "limitReached": "Limit reached"
     },
     "chart": {
       "heading": "Points – {{ month }} {{ year }}"

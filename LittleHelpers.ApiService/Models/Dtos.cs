@@ -7,9 +7,9 @@ public record UserDto(int Id, string Username, string UserLevel, decimal? Monthl
 public record CreateUserRequest(string Username, string Password, string UserLevel, decimal? MonthlyAllowance = null, int? PointsGoal = null);
 public record UpdateUserRequest(string? Password, string? UserLevel, decimal? MonthlyAllowance = null, int? PointsGoal = null);
 
-public record ChoreDto(int Id, string Name, int Points, bool IsHidden, IEnumerable<int> AssignedUserIds, IEnumerable<Link> Links);
-public record CreateChoreRequest(string Name, int Points, List<int> AssignedUserIds);
-public record UpdateChoreRequest(string? Name, int? Points, bool? IsHidden, List<int>? AssignedUserIds);
+public record ChoreDto(int Id, string Name, int Points, bool IsHidden, int? MaxTimesPerDay, int? MinDaysBetween, int? MaxTimesPerWeek, IEnumerable<int> AssignedUserIds, IEnumerable<Link> Links, bool IsLimited = false);
+public record CreateChoreRequest(string Name, int Points, List<int> AssignedUserIds, int? MaxTimesPerDay = null, int? MinDaysBetween = null, int? MaxTimesPerWeek = null);
+public record UpdateChoreRequest(string? Name, int? Points, bool? IsHidden, List<int>? AssignedUserIds, int? MaxTimesPerDay = null, int? MinDaysBetween = null, int? MaxTimesPerWeek = null);
 
 public record ChoreLogDto(int Id, int ChoreId, string ChoreName, int ChildId, int PerformedBy, string PerformedByName, int Points, DateTimeOffset Timestamp);
 

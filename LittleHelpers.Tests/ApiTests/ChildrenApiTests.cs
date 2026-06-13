@@ -59,13 +59,14 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
         var body = await response.Content.ReadFromJsonAsync<ChildSummaryDto>();
         Assert.Equal(childId, body?.Id);
         Assert.NotNull(body?.AssignedChores);
-        Assert.Contains(body!.AssignedChores, c => c.Id == choreId);
+        var chore = Assert.Single(body!.AssignedChores, c => c.Id == choreId);
+        Assert.Contains(chore.Links, l => l.Rel == "complete");
     }
 
     [Fact]
     public async Task GetChildDetail_AsOwnChild_ReturnsOk()
     {
-        int childId = 0;
+        int childId = 0, choreId = 0;
         await _factory.SeedAsync(async db =>
         {
             var child = new User
@@ -74,14 +75,100 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
                 UserLevel = UserLevel.Child
             };
             db.Users.Add(child);
+            var chore = new Chore { Name = "Weekly chore", Points = 5, MaxTimesPerWeek = 1 };
+            db.Chores.Add(chore);
             await db.SaveChangesAsync();
             childId = child.Id;
+            choreId = chore.Id;
+            db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = choreId, UserId = childId });
+            db.ChoreLogs.Add(new ChoreLog
+            {
+                ChoreId = choreId,
+                ChoreName = chore.Name,
+                ChildId = childId,
+                PerformedBy = childId,
+                Points = chore.Points,
+                Timestamp = DateTimeOffset.UtcNow
+            });
+            await db.SaveChangesAsync();
         });
 
         var client = _factory.CreateAuthenticatedClient(childId, "self_child", "Child");
         var response = await client.GetAsync($"/children/{childId}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ChildSummaryDto>();
+        var chore = Assert.Single(body!.AssignedChores, c => c.Id == choreId);
+        Assert.DoesNotContain(chore.Links, l => l.Rel == "complete");
+    }
+
+    [Fact]
+    public async Task GetChildDetail_AsParent_LimitedChoreIsVisibleAndCompletable()
+    {
+        int childId = 0, choreId = 0;
+        await _factory.SeedAsync(async db =>
+        {
+            var child = new User
+            {
+                Username = $"limited_child_{Guid.NewGuid():N}",
+                PasswordHash = "x",
+                UserLevel = UserLevel.Child
+            };
+            db.Users.Add(child);
+            var chore = new Chore { Name = "Limited weekly chore", Points = 5, MaxTimesPerWeek = 1 };
+            db.Chores.Add(chore);
+            await db.SaveChangesAsync();
+            childId = child.Id;
+            choreId = chore.Id;
+            db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = choreId, UserId = childId });
+            db.ChoreLogs.Add(new ChoreLog
+            {
+                ChoreId = choreId,
+                ChoreName = chore.Name,
+                ChildId = childId,
+                PerformedBy = childId,
+                Points = chore.Points,
+                Timestamp = DateTimeOffset.UtcNow
+            });
+            await db.SaveChangesAsync();
+        });
+
+        var client = _factory.CreateAuthenticatedClient(1, "admin", "Parent");
+        var response = await client.GetAsync($"/children/{childId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ChildSummaryDto>();
+        var chore = Assert.Single(body!.AssignedChores, c => c.Id == choreId);
+        Assert.True(chore.IsLimited);
+        Assert.Contains(chore.Links, l => l.Rel == "complete");
+    }
+
+    [Fact]
+    public async Task GetChildDetail_AsDifferentChild_ReturnsForbidden()
+    {
+        int childId = 0, otherChildId = 0;
+        await _factory.SeedAsync(async db =>
+        {
+            var child = new User
+            {
+                Username = $"child_a_{Guid.NewGuid():N}", PasswordHash = "x",
+                UserLevel = UserLevel.Child
+            };
+            var otherChild = new User
+            {
+                Username = $"child_b_{Guid.NewGuid():N}", PasswordHash = "x",
+                UserLevel = UserLevel.Child
+            };
+            db.Users.AddRange(child, otherChild);
+            await db.SaveChangesAsync();
+            childId = child.Id;
+            otherChildId = otherChild.Id;
+        });
+
+        var client = _factory.CreateAuthenticatedClient(childId, "child_a", "Child");
+        var response = await client.GetAsync($"/children/{otherChildId}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -151,5 +238,39 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
         var logs = await response.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>();
         Assert.All(logs!, l => Assert.Equal(2025, l.Timestamp.Year));
         Assert.All(logs!, l => Assert.Equal(1, l.Timestamp.Month));
+    }
+
+    [Fact]
+    public async Task GetChoreLog_AsOwnChild_ReturnsOk()
+    {
+        int childId = 0;
+        await _factory.SeedAsync(async db =>
+        {
+            var child = new User
+            {
+                Username = $"log_own_{Guid.NewGuid():N}", PasswordHash = "x",
+                UserLevel = UserLevel.Child
+            };
+            db.Users.Add(child);
+            await db.SaveChangesAsync();
+            childId = child.Id;
+            db.ChoreLogs.Add(new ChoreLog
+            {
+                ChoreId = 1,
+                ChoreName = "Own log",
+                ChildId = childId,
+                PerformedBy = childId,
+                Points = 2,
+                Timestamp = DateTimeOffset.UtcNow
+            });
+            await db.SaveChangesAsync();
+        });
+
+        var client = _factory.CreateAuthenticatedClient(childId, "log_own", "Child");
+        var response = await client.GetAsync($"/chorelog/{childId}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var logs = await response.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>();
+        Assert.Contains(logs!, l => l.ChildId == childId);
     }
 }

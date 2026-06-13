@@ -36,6 +36,9 @@ export class ChoreFormComponent implements OnInit {
     name: ['', Validators.required],
     points: [1, Validators.required],
     assignedUserIds: [[] as number[]],
+    maxTimesPerDay: [null as number | null],
+    minDaysBetween: [null as number | null],
+    maxTimesPerWeek: [null as number | null],
   });
 
   ngOnInit() {
@@ -44,7 +47,14 @@ export class ChoreFormComponent implements OnInit {
       this.editId.set(+id);
       forkJoin({ users: this.userSvc.getAll(), chore: this.svc.getById(+id) }).subscribe(({ users, chore }) => {
         this.users.set(users);
-        this.form.patchValue({ name: chore.name, points: chore.points, assignedUserIds: chore.assignedUserIds });
+        this.form.patchValue({
+          name: chore.name,
+          points: chore.points,
+          assignedUserIds: chore.assignedUserIds,
+          maxTimesPerDay: chore.maxTimesPerDay,
+          minDaysBetween: chore.minDaysBetween,
+          maxTimesPerWeek: chore.maxTimesPerWeek,
+        });
         const parentIds = users.filter(u => u.userLevel === 'Parent').map(u => u.id);
         this.forParents.set((chore.assignedUserIds as number[]).some(id => parentIds.includes(id)));
       });
@@ -76,12 +86,12 @@ export class ChoreFormComponent implements OnInit {
   submit() {
     if (this.form.invalid) return;
     this.loading.set(true);
-    const { name, points, assignedUserIds } = this.form.value;
+    const { name, points, assignedUserIds, maxTimesPerDay, minDaysBetween, maxTimesPerWeek } = this.form.value;
     const id = this.editId();
 
     const obs = id
-      ? this.svc.update(id, { name: name!, points: points!, assignedUserIds: assignedUserIds! })
-      : this.svc.create({ name: name!, points: points!, assignedUserIds: assignedUserIds! });
+      ? this.svc.update(id, { name: name!, points: points!, assignedUserIds: assignedUserIds!, maxTimesPerDay, minDaysBetween, maxTimesPerWeek })
+      : this.svc.create({ name: name!, points: points!, assignedUserIds: assignedUserIds!, maxTimesPerDay, minDaysBetween, maxTimesPerWeek });
 
     obs.subscribe({
       next: () => this.router.navigate(['/chores']),

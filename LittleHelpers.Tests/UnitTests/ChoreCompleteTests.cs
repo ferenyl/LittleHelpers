@@ -1,9 +1,11 @@
 using System.Security.Claims;
-using LittleHelpers.ApiService.Controllers;
+using LittleHelpers.ApiService.Application.Chores;
+using LittleHelpers.ApiService.Application.Cqrs;
 using LittleHelpers.ApiService.Data;
+using LittleHelpers.ApiService.Data.Repositories;
 using LittleHelpers.ApiService.Models;
+using LittleHelpers.ApiService.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 
@@ -11,9 +13,16 @@ namespace LittleHelpers.Tests.UnitTests;
 
 public class ChoreCompleteTests : IDisposable
 {
+    private sealed class FakeDateTimeProvider(DateTimeOffset initialNow) : IDateTimeProvider
+    {
+        public DateTimeOffset UtcNow { get; set; } = initialNow;
+        public DateTime UtcNowDateTime => UtcNow.UtcDateTime;
+    }
+
     private readonly AppDbContext _db;
-    private readonly ChoresController _controller;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly CompleteChoreCommandHandler _handler;
+    private readonly FakeDateTimeProvider _dateTimeProvider;
 
     private readonly User _parent;
     private readonly User _child;
@@ -39,7 +48,13 @@ public class ChoreCompleteTests : IDisposable
         _db.SaveChanges();
 
         _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
-        _controller = new ChoresController(_db, _httpContextAccessor);
+        _dateTimeProvider = new FakeDateTimeProvider(new DateTimeOffset(2026, 6, 13, 10, 0, 0, TimeSpan.Zero));
+        _handler = new CompleteChoreCommandHandler(
+            new EfChoreRepository(_db),
+            new EfChoreLogRepository(_db),
+            new ChoreAvailabilityService(),
+            _httpContextAccessor,
+            _dateTimeProvider);
     }
 
     private void SetUser(int userId, string username, string role)
@@ -52,7 +67,6 @@ public class ChoreCompleteTests : IDisposable
             new Claim(ClaimTypes.Role, role)
         ], "test"));
         _httpContextAccessor.HttpContext.Returns(ctx);
-        _controller.ControllerContext = new ControllerContext { HttpContext = ctx };
     }
 
     [Fact]
@@ -60,7 +74,7 @@ public class ChoreCompleteTests : IDisposable
     {
         SetUser(_child.Id, "child", "Child");
 
-        await _controller.Complete(_chore.Id);
+        var result = await _handler.Handle(new CompleteChoreCommand(_chore.Id));
 
         var log = _db.ChoreLogs.FirstOrDefault();
         Assert.NotNull(log);
@@ -68,6 +82,8 @@ public class ChoreCompleteTests : IDisposable
         Assert.Equal(_child.Id, log.ChildId);
         Assert.Equal(_child.Id, log.PerformedBy);
         Assert.Equal(10, log.Points);
+        Assert.Equal(_chore.Id, result.ChoreId);
+        Assert.Equal(_child.Id, result.ChildId);
     }
 
     [Fact]
@@ -78,9 +94,7 @@ public class ChoreCompleteTests : IDisposable
         await _db.SaveChangesAsync();
         SetUser(otherChild.Id, "other", "Child");
 
-        var result = await _controller.Complete(_chore.Id);
-
-        Assert.IsType<ForbidResult>(result);
+        await Assert.ThrowsAsync<RequestAuthorizationException>(() => _handler.Handle(new CompleteChoreCommand(_chore.Id)));
     }
 
     [Fact]
@@ -88,12 +102,14 @@ public class ChoreCompleteTests : IDisposable
     {
         SetUser(_parent.Id, "parent", "Parent");
 
-        await _controller.Complete(_chore.Id);
+        var result = await _handler.Handle(new CompleteChoreCommand(_chore.Id));
 
         var log = _db.ChoreLogs.FirstOrDefault();
         Assert.NotNull(log);
         Assert.Equal(_child.Id, log.ChildId);
         Assert.Equal(_parent.Id, log.PerformedBy);
+        Assert.Equal(_child.Id, result.ChildId);
+        Assert.Equal(_parent.Id, result.PerformedBy);
     }
 
     [Fact]
@@ -101,9 +117,100 @@ public class ChoreCompleteTests : IDisposable
     {
         SetUser(_child.Id, "child", "Child");
 
-        var result = await _controller.Complete(9999);
+        await Assert.ThrowsAsync<RequestNotFoundException>(() => _handler.Handle(new CompleteChoreCommand(9999)));
+    }
 
-        Assert.IsType<NotFoundResult>(result);
+    [Fact]
+    public async Task Complete_ExceedsMaxTimesPerDay_ReturnsBadRequest()
+    {
+        var chore = new Chore { Name = "Daily task", Points = 5, MaxTimesPerDay = 1 };
+        _db.Chores.Add(chore);
+        _db.SaveChanges();
+        _db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = chore.Id, UserId = _child.Id });
+        _db.SaveChanges();
+
+        SetUser(_child.Id, "child", "Child");
+
+        // First completion should succeed
+        var result1 = await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        Assert.Equal(chore.Id, result1.ChoreId);
+
+        // Second completion same day should fail
+        await Assert.ThrowsAsync<RequestValidationException>(() => _handler.Handle(new CompleteChoreCommand(chore.Id)));
+    }
+
+    [Fact]
+    public async Task Complete_AfterNextDay_AllowsCompletionAgain()
+    {
+        var chore = new Chore { Name = "Daily task", Points = 5, MaxTimesPerDay = 1 };
+        _db.Chores.Add(chore);
+        _db.SaveChanges();
+        _db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = chore.Id, UserId = _child.Id });
+        _db.SaveChanges();
+
+        SetUser(_child.Id, "child", "Child");
+
+        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        _dateTimeProvider.UtcNow = _dateTimeProvider.UtcNow.AddDays(1);
+
+        var result = await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        Assert.Equal(chore.Id, result.ChoreId);
+    }
+
+    [Fact]
+    public async Task Complete_ViolatesTooSoonForMinDaysBetween_ReturnsBadRequest()
+    {
+        var chore = new Chore { Name = "Every other day", Points = 10, MinDaysBetween = 2 };
+        _db.Chores.Add(chore);
+        _db.SaveChanges();
+        _db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = chore.Id, UserId = _child.Id });
+        _db.SaveChanges();
+
+        SetUser(_child.Id, "child", "Child");
+
+        // First completion
+        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+
+        // Try again immediately - should fail
+        await Assert.ThrowsAsync<RequestValidationException>(() => _handler.Handle(new CompleteChoreCommand(chore.Id)));
+    }
+
+    [Fact]
+    public async Task Complete_ExceedsMaxTimesPerWeek_ReturnsBadRequest()
+    {
+        var chore = new Chore { Name = "Weekly task", Points = 15, MaxTimesPerWeek = 1 };
+        _db.Chores.Add(chore);
+        _db.SaveChanges();
+        _db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = chore.Id, UserId = _child.Id });
+        _db.SaveChanges();
+
+        SetUser(_child.Id, "child", "Child");
+
+        // First completion in the week
+        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+
+        // Second completion same week should fail
+        await Assert.ThrowsAsync<RequestValidationException>(() => _handler.Handle(new CompleteChoreCommand(chore.Id)));
+    }
+
+    [Fact]
+    public async Task Complete_Parent_CanOverrideFrequencyLimits()
+    {
+        var chore = new Chore { Name = "Weekly task", Points = 15, MaxTimesPerWeek = 1 };
+        _db.Chores.Add(chore);
+        _db.SaveChanges();
+        _db.ChoreAssignments.Add(new ChoreAssignment { ChoreId = chore.Id, UserId = _child.Id });
+        _db.SaveChanges();
+
+        SetUser(_child.Id, "child", "Child");
+        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+
+        SetUser(_parent.Id, "parent", "Parent");
+        var result = await _handler.Handle(new CompleteChoreCommand(chore.Id, _child.Id));
+
+        Assert.Equal(chore.Id, result.ChoreId);
+        Assert.Equal(_child.Id, result.ChildId);
+        Assert.Equal(_parent.Id, result.PerformedBy);
     }
 
     public void Dispose() => _db.Dispose();

@@ -7,12 +7,16 @@ export interface ChoreDto {
   name: string;
   points: number;
   isHidden: boolean;
+  isLimited: boolean;
+  maxTimesPerDay: number | null;
+  minDaysBetween: number | null;
+  maxTimesPerWeek: number | null;
   assignedUserIds: number[];
   links: { href: string; rel: string; method: string }[];
 }
 
-export interface CreateChoreRequest { name: string; points: number; assignedUserIds: number[]; }
-export interface UpdateChoreRequest { name?: string; points?: number; isHidden?: boolean; assignedUserIds?: number[]; }
+export interface CreateChoreRequest { name: string; points: number; assignedUserIds: number[]; maxTimesPerDay?: number | null; minDaysBetween?: number | null; maxTimesPerWeek?: number | null; }
+export interface UpdateChoreRequest { name?: string; points?: number; isHidden?: boolean; assignedUserIds?: number[]; maxTimesPerDay?: number | null; minDaysBetween?: number | null; maxTimesPerWeek?: number | null; }
 
 @Injectable({ providedIn: 'root' })
 export class ChoreService {

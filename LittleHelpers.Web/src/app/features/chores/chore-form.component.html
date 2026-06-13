@@ -1,7 +1,7 @@
 <div class="page">
   <h1 class="mb-4">{{ editId() ? ('chores.editHeading' | transloco) : ('chores.createHeading' | transloco) }}</h1>
   @if (error()) { <div class="alert alert-danger">{{ error() }}</div> }
-  <form [formGroup]="form" (ngSubmit)="submit()" class="card shadow-sm p-4" style="max-width:480px">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="card shadow-sm p-4" style="max-width:600px">
     <div class="mb-3">
       <label class="form-label">{{ 'chores.form.name' | transloco }}</label>
       <input formControlName="name" type="text" class="form-control" />
@@ -10,6 +10,25 @@
       <label class="form-label">{{ 'chores.form.points' | transloco }}</label>
       <input formControlName="points" type="number" class="form-control" />
     </div>
+
+    <fieldset class="border rounded p-3 mb-3">
+      <legend class="float-none w-auto px-2 fs-6 text-muted">{{ 'chores.form.frequency' | transloco }}</legend>
+      <div class="mb-3">
+        <label class="form-label">{{ 'chores.form.maxTimesPerDay' | transloco }}</label>
+        <input formControlName="maxTimesPerDay" type="number" class="form-control" placeholder="(valfritt)" />
+        <small class="form-text text-muted">{{ 'chores.form.maxTimesPerDayHint' | transloco }}</small>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">{{ 'chores.form.minDaysBetween' | transloco }}</label>
+        <input formControlName="minDaysBetween" type="number" class="form-control" placeholder="(valfritt)" />
+        <small class="form-text text-muted">{{ 'chores.form.minDaysBetweenHint' | transloco }}</small>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">{{ 'chores.form.maxTimesPerWeek' | transloco }}</label>
+        <input formControlName="maxTimesPerWeek" type="number" class="form-control" placeholder="(valfritt)" />
+        <small class="form-text text-muted">{{ 'chores.form.maxTimesPerWeekHint' | transloco }}</small>
+      </div>
+    </fieldset>
 
     <fieldset class="border rounded p-3 mb-3">
       <legend class="float-none w-auto px-2 fs-6 text-muted">{{ 'chores.form.assignTo' | transloco }}</legend>

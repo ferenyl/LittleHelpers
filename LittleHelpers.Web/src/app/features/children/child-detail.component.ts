@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ChildrenService, ChildSummaryDto, ChoreLogDto } from '../../core/children.service';
 import { ChoreService } from '../../core/chore.service';
+import { AuthService } from '../../core/auth.service';
 
 interface DayPoint { day: number; points: number; cumulative: number; }
 
@@ -19,6 +20,7 @@ export class ChildDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private childSvc = inject(ChildrenService);
   private choreSvc = inject(ChoreService);
+  private auth = inject(AuthService);
   private transloco = inject(TranslocoService);
 
   child = signal<ChildSummaryDto | null>(null);
@@ -37,6 +39,23 @@ export class ChildDetailComponent implements OnInit {
   visibleHistory = computed(() =>
     this.historyExpanded() ? this.logs() : this.logs().slice(0, 5)
   );
+
+  isParent = computed(() => this.auth.userLevel() === 'Parent');
+
+  availableChores = computed(() => {
+    const child = this.child();
+    if (!child) {
+      return [];
+    }
+
+    return child.assignedChores.filter(chore => {
+      if (!chore.assignedUserIds.includes(this.childId)) {
+        return false;
+      }
+
+      return this.isParent() || this.hasCompleteLink(chore);
+    });
+  });
 
   totalPoints = computed(() => this.logs().reduce((s, l) => s + l.points, 0));
 
@@ -132,5 +151,9 @@ export class ChildDetailComponent implements OnInit {
       next: () => { this.completing.set(null); this.loadLogs(); },
       error: () => this.completing.set(null),
     });
+  }
+
+  hasCompleteLink(chore: { links: { rel: string }[] }) {
+    return chore.links.some(link => link.rel === 'complete');
   }
 }

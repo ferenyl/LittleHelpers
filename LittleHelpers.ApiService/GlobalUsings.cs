@@ -1,0 +1,11 @@
+global using LittleHelpers.ApiService.Application.Cqrs;
+global using LittleHelpers.ApiService.Application.Auth;
+global using LittleHelpers.ApiService.Application.Children;
+global using LittleHelpers.ApiService.Application.Chores;
+global using LittleHelpers.ApiService.Application.ChoreLogs;
+global using LittleHelpers.ApiService.Application.Mapping;
+global using LittleHelpers.ApiService.Application.Menu;
+global using LittleHelpers.ApiService.Application.Users;
+global using LittleHelpers.ApiService.Data.Repositories;
+global using LittleHelpers.ApiService.Models;
+global using LittleHelpers.ApiService.Services;
