@@ -276,6 +276,46 @@ All tests are in `LittleHelpers.Tests/`. The test suite uses an in-memory JWT ke
 
 ---
 
+## Releases (GitHub tag-driven)
+
+Releases are created automatically by GitHub Actions when you push a version tag that points to a commit on `main`.
+
+### Tag formats
+
+| Tag example | Type | GitHub release | Docker tags |
+|---|---|---|---|
+| `v0.0.7` | Stable release | Release | `v0.0.7` + `latest` |
+| `v0.0.7-pre1` | Pre-release | Pre-release | `v0.0.7-pre1` + `prerelease` |
+
+### What happens automatically
+
+1. CI tests run first (.NET + Angular build/tests).
+2. Docker images are built and pushed (`ferenyl/littlehelpers.api` and `ferenyl/littlehelpers.web`).
+3. A GitHub release is created from the tag.
+4. Release notes are auto-generated from commits since the previous release and include GitHub compare links.
+
+### Create a stable release
+
+```bash
+git checkout main
+git pull --ff-only
+git tag v0.0.7
+git push origin v0.0.7
+```
+
+### Create a pre-release
+
+```bash
+git checkout main
+git pull --ff-only
+git tag v0.0.7-pre1
+git push origin v0.0.7-pre1
+```
+
+> If a tag does not point to a commit contained in `main`, release/publish jobs are skipped.
+
+---
+
 ## Translations (i18n)
 
 The frontend uses [`@jsverse/transloco`](https://jsverse.github.io/transloco/) for internationalization. Supported languages are **English** (default) and **Swedish**.
