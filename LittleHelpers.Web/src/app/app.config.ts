@@ -15,9 +15,20 @@ class TranslocoHttpLoader implements TranslocoLoader {
   }
 }
 
-function detectLanguage(): string {
-  const browserLang = navigator.language?.split('-')[0]?.toLowerCase();
-  return browserLang === 'sv' ? 'sv' : 'en';
+const availableLangs: string[] = ['en', 'sv'];
+const fallbackLang = 'en';
+
+function detectLanguage(supportedLangs: readonly string[], defaultLang: string): string {
+  const preferred = [
+    ...(navigator.languages ?? []),
+    navigator.language,
+    document.documentElement.lang,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .map(value => value.split('-')[0]?.toLowerCase())
+    .filter((value): value is string => Boolean(value));
+
+  return preferred.find(lang => supportedLangs.includes(lang)) ?? defaultLang;
 }
 
 export const appConfig: ApplicationConfig = {
@@ -27,8 +38,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([jwtInterceptor])),
     provideTransloco({
       config: {
-        availableLangs: ['en', 'sv'],
-        defaultLang: detectLanguage(),
+        availableLangs,
+        defaultLang: detectLanguage(availableLangs, fallbackLang),
+        fallbackLang,
         reRenderOnLangChange: true,
         prodMode: !isDevMode(),
       },
