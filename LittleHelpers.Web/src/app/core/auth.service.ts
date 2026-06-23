@@ -18,6 +18,7 @@ export interface MenuItemDto {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly tokenKey = 'lh_token';
+  private readonly userIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
 
   private _token = signal<string | null>(localStorage.getItem(this.tokenKey));
   private _username = signal<string | null>(localStorage.getItem('lh_username'));
@@ -55,5 +56,24 @@ export class AuthService {
 
   getMenu() {
     return this.http.get<MenuItemDto[]>(`${environment.apiUrl}/menu`);
+  }
+
+  getUserIdFromToken(): string | null {
+    const token = this._token();
+    if (!token) return null;
+
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) return null;
+
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+
+    try {
+      const payload = JSON.parse(atob(padded)) as Record<string, unknown>;
+      const userId = payload[this.userIdClaim];
+      return typeof userId === 'string' && userId.length > 0 ? userId : null;
+    } catch {
+      return null;
+    }
   }
 }

@@ -39,7 +39,12 @@ export class LoginComponent {
         if (res.userLevel === 'Parent') {
           this.router.navigate(['/children']);
         } else {
-          this.router.navigate(['/children', this.extractUserId()]);
+          const userId = this.auth.getUserIdFromToken();
+          if (userId) {
+            this.router.navigate(['/children', userId]);
+          } else {
+            this.error.set(this.transloco.translate('login.error'));
+          }
         }
       },
       error: () => {
@@ -47,16 +52,5 @@ export class LoginComponent {
         this.error.set(this.transloco.translate('login.error'));
       },
     });
-  }
-
-  private extractUserId(): string {
-    const token = this.auth.token();
-    if (!token) return '';
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? '';
-    } catch {
-      return '';
-    }
   }
 }

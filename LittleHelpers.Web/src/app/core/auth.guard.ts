@@ -11,6 +11,20 @@ export const authGuard: CanActivateFn = () => {
   return router.createUrlTree(['/login']);
 };
 
+export const loginGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (!auth.isLoggedIn()) return true;
+
+  if (auth.userLevel() === 'Child') {
+    const userId = auth.getUserIdFromToken();
+    if (userId) return router.createUrlTree(['/children', userId]);
+  }
+
+  return router.createUrlTree(['/children']);
+};
+
 export const parentGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
