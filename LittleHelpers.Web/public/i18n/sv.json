@@ -123,7 +123,10 @@
     "chores": {
       "heading": "Sysslor",
       "empty": "Det finns inga sysslor som går att göra just nu.",
-      "limitReached": "Limit nådd"
+      "limitReached": "Limit nådd",
+      "confirmTitle": "Bekräfta syssla",
+      "confirmComplete": "Markera \"{{ choreName }}\" som klar?",
+      "confirmAction": "Markera som klar"
     },
     "chart": {
       "heading": "Poäng – {{ month }} {{ year }}"

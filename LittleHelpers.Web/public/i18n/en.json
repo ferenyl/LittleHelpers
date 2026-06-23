@@ -123,7 +123,10 @@
     "chores": {
       "heading": "Chores",
       "empty": "There are no chores you can do right now.",
-      "limitReached": "Limit reached"
+      "limitReached": "Limit reached",
+      "confirmTitle": "Confirm chore",
+      "confirmComplete": "Mark \"{{ choreName }}\" as done?",
+      "confirmAction": "Mark as done"
     },
     "chart": {
       "heading": "Points – {{ month }} {{ year }}"

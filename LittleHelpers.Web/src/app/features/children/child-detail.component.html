@@ -59,6 +59,31 @@
               </button>
             }
           </div>
+
+          @if (pendingConfirmation(); as pending) {
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">{{ 'childDetail.chores.confirmTitle' | transloco }}</h5>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="cancelMobileComplete()"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="mb-0">{{ 'childDetail.chores.confirmComplete' | transloco: { choreName: pending.name } }}</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" (click)="cancelMobileComplete()">
+                      {{ 'common.cancel' | transloco }}
+                    </button>
+                    <button type="button" class="btn btn-primary" [disabled]="completing() === pending.id" (click)="confirmMobileComplete()">
+                      {{ 'childDetail.chores.confirmAction' | transloco }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+          }
         } @else {
           <p class="text-muted mb-0">{{ 'childDetail.chores.empty' | transloco }}</p>
         }

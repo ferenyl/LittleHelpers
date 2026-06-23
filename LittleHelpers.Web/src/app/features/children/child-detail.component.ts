@@ -7,6 +7,7 @@ import { ChoreService } from '../../core/chore.service';
 import { AuthService } from '../../core/auth.service';
 
 interface DayPoint { day: number; points: number; cumulative: number; }
+interface ChoreConfirmation { id: number; name: string; }
 
 @Component({
   selector: 'app-child-detail',
@@ -28,6 +29,7 @@ export class ChildDetailComponent implements OnInit {
   loading = signal(true);
   historyExpanded = signal(false);
   completing = signal<number | null>(null);
+  pendingConfirmation = signal<ChoreConfirmation | null>(null);
 
   now = new Date();
   year = signal(this.now.getFullYear());
@@ -146,11 +148,43 @@ export class ChildDetailComponent implements OnInit {
   }
 
   complete(choreId: number) {
+    const chore = this.availableChores().find(candidate => candidate.id === choreId);
+    if (!chore) {
+      return;
+    }
+
+    if (this.requiresTouchConfirmation()) {
+      this.pendingConfirmation.set({ id: chore.id, name: chore.name });
+      return;
+    }
+
+    this.completeNow(chore.id);
+  }
+
+  confirmMobileComplete() {
+    const pending = this.pendingConfirmation();
+    if (!pending) {
+      return;
+    }
+
+    this.pendingConfirmation.set(null);
+    this.completeNow(pending.id);
+  }
+
+  cancelMobileComplete() {
+    this.pendingConfirmation.set(null);
+  }
+
+  private completeNow(choreId: number) {
     this.completing.set(choreId);
     this.choreSvc.complete(choreId, this.childId).subscribe({
       next: () => { this.completing.set(null); this.loadLogs(); },
       error: () => this.completing.set(null),
     });
+  }
+
+  private requiresTouchConfirmation() {
+    return window.matchMedia('(max-width: 768px)').matches;
   }
 
   hasCompleteLink(chore: { links: { rel: string }[] }) {
