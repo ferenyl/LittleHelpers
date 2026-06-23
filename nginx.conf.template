@@ -24,6 +24,13 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # Never return 404 for declared PWA icons; fall back to a valid base icon.
+    location ^~ /icons/ {
+        try_files $uri /icons/icon-192.png;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
     # SPA-fallback – alla rutter hanteras av Angular
     location / {
         try_files $uri $uri/ /index.html;
