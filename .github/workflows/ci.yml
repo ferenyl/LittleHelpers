@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: ["**"]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run tests
@@ -47,19 +50,71 @@ jobs:
         run: npx ng test --watch=false
         working-directory: LittleHelpers.Web
 
+  tag-meta:
+    name: Evaluate release tag
+    if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    outputs:
+      on_main: ${{ steps.meta.outputs.on_main }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      release_version: ${{ steps.meta.outputs.release_version }}
+      api_tags: ${{ steps.meta.outputs.api_tags }}
+      web_tags: ${{ steps.meta.outputs.web_tags }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build tag metadata
+        id: meta
+        run: |
+          set -euo pipefail
+
+          echo "release_version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+          if git branch -r --contains "$GITHUB_SHA" | grep -qE 'origin/main$'; then
+            echo "on_main=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "on_main=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ "$GITHUB_REF_NAME" == *-pre* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "api_tags<<EOF"
+              echo "ferenyl/littlehelpers.api:${GITHUB_REF_NAME}"
+              echo "ferenyl/littlehelpers.api:prerelease"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            {
+              echo "web_tags<<EOF"
+              echo "ferenyl/littlehelpers.web:${GITHUB_REF_NAME}"
+              echo "ferenyl/littlehelpers.web:prerelease"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "api_tags<<EOF"
+              echo "ferenyl/littlehelpers.api:${GITHUB_REF_NAME}"
+              echo "ferenyl/littlehelpers.api:latest"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            {
+              echo "web_tags<<EOF"
+              echo "ferenyl/littlehelpers.web:${GITHUB_REF_NAME}"
+              echo "ferenyl/littlehelpers.web:latest"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
   publish:
     name: Build & push Docker images
-    needs: test
-    if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+    needs: [test, tag-meta]
+    if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v') && needs.tag-meta.outputs.on_main == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Extract tag name
-        id: tag
-        run: |
-          echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          echo "release_version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -76,9 +131,7 @@ jobs:
           context: .
           file: Dockerfile.api
           push: true
-          tags: |
-            ferenyl/littlehelpers.api:${{ steps.tag.outputs.name }}
-            ferenyl/littlehelpers.api:latest
+          tags: ${{ needs.tag-meta.outputs.api_tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -88,10 +141,22 @@ jobs:
           context: .
           file: Dockerfile.web
           build-args: |
-            RELEASE_VERSION=${{ steps.tag.outputs.release_version }}
+            RELEASE_VERSION=${{ needs.tag-meta.outputs.release_version }}
           push: true
-          tags: |
-            ferenyl/littlehelpers.web:${{ steps.tag.outputs.name }}
-            ferenyl/littlehelpers.web:latest
+          tags: ${{ needs.tag-meta.outputs.web_tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  release:
+    name: Create GitHub Release
+    needs: [test, tag-meta]
+    if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v') && needs.tag-meta.outputs.on_main == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create release from tag
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ needs.tag-meta.outputs.prerelease == 'true' }}
+          generate_release_notes: true
