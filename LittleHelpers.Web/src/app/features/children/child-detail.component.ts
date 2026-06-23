@@ -8,6 +8,7 @@ import { AuthService } from '../../core/auth.service';
 
 interface DayPoint { day: number; points: number; cumulative: number; }
 interface ChoreConfirmation { id: number; name: string; }
+interface HistoryDeleteConfirmation { id: number; choreName: string; }
 
 @Component({
   selector: 'app-child-detail',
@@ -29,7 +30,9 @@ export class ChildDetailComponent implements OnInit {
   loading = signal(true);
   historyExpanded = signal(false);
   completing = signal<number | null>(null);
+  deletingHistoryId = signal<number | null>(null);
   pendingConfirmation = signal<ChoreConfirmation | null>(null);
+  pendingHistoryDelete = signal<HistoryDeleteConfirmation | null>(null);
 
   now = new Date();
   year = signal(this.now.getFullYear());
@@ -173,6 +176,39 @@ export class ChildDetailComponent implements OnInit {
 
   cancelMobileComplete() {
     this.pendingConfirmation.set(null);
+  }
+
+  deleteHistoryItem(log: ChoreLogDto) {
+    if (!this.isParent()) {
+      return;
+    }
+
+    if (this.deletingHistoryId() === log.id) {
+      return;
+    }
+
+    this.pendingHistoryDelete.set({ id: log.id, choreName: log.choreName });
+  }
+
+  confirmHistoryDelete() {
+    const pending = this.pendingHistoryDelete();
+    if (!pending) {
+      return;
+    }
+
+    this.pendingHistoryDelete.set(null);
+    this.deletingHistoryId.set(pending.id);
+    this.childSvc.deleteLog(pending.id).subscribe({
+      next: () => {
+        this.logs.update(items => items.filter(item => item.id !== pending.id));
+        this.deletingHistoryId.set(null);
+      },
+      error: () => this.deletingHistoryId.set(null),
+    });
+  }
+
+  cancelHistoryDelete() {
+    this.pendingHistoryDelete.set(null);
   }
 
   private completeNow(choreId: number) {

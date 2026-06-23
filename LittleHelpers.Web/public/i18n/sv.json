@@ -136,7 +136,11 @@
       "showLess": "Visa färre",
       "showAll": "Visa alla ({{ count }})",
       "empty": "Inga sysslor den här månaden.",
-      "by": "av"
+      "by": "av",
+      "delete": "Ta bort historikpost",
+      "confirmTitle": "Ta bort historikpost",
+      "confirmDelete": "Ta bort \"{{ choreName }}\" från historiken?",
+      "confirmAction": "Ta bort"
     }
   },
   "months": {

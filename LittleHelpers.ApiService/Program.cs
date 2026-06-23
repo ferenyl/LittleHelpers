@@ -64,6 +64,7 @@ builder.Services.AddDecoratedCommandHandler<DeleteUserCommand, Unit, DeleteUserC
 builder.Services.AddDecoratedQueryHandler<LoginQuery, LoginResponse, LoginQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetMenuQuery, IReadOnlyList<MenuItemDto>, GetMenuQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetChoreLogQuery, IReadOnlyList<ChoreLogDto>, GetChoreLogQueryHandler>();
+builder.Services.AddDecoratedCommandHandler<DeleteChoreLogCommand, Unit, DeleteChoreLogCommandHandler>();
 builder.Services.AddDecoratedQueryHandler<GetChildrenQuery, IReadOnlyList<ChildSummaryDto>, GetChildrenQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetChildDetailQuery, ChildSummaryDto, GetChildDetailQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetChoresQuery, IReadOnlyList<ChoreDto>, GetChoresQueryHandler>();

@@ -136,7 +136,11 @@
       "showLess": "Show fewer",
       "showAll": "Show all ({{ count }})",
       "empty": "No chores this month.",
-      "by": "by"
+      "by": "by",
+      "delete": "Delete history item",
+      "confirmTitle": "Delete history item",
+      "confirmDelete": "Delete \"{{ choreName }}\" from history?",
+      "confirmAction": "Delete"
     }
   },
   "months": {

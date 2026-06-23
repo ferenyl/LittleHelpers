@@ -273,4 +273,81 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
         var logs = await response.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>();
         Assert.Contains(logs!, l => l.ChildId == childId);
     }
+
+    [Fact]
+    public async Task DeleteChoreLog_AsParent_ReturnsNoContentAndRemovesLog()
+    {
+        int childId = 0;
+        int logId = 0;
+        await _factory.SeedAsync(async db =>
+        {
+            var child = new User
+            {
+                Username = $"log_delete_{Guid.NewGuid():N}", PasswordHash = "x",
+                UserLevel = UserLevel.Child
+            };
+            db.Users.Add(child);
+            await db.SaveChangesAsync();
+            childId = child.Id;
+
+            var log = new ChoreLog
+            {
+                ChoreId = 1,
+                ChoreName = "Delete me",
+                ChildId = childId,
+                PerformedBy = childId,
+                Points = 4,
+                Timestamp = DateTimeOffset.UtcNow
+            };
+            db.ChoreLogs.Add(log);
+            await db.SaveChangesAsync();
+            logId = log.Id;
+        });
+
+        var client = _factory.CreateAuthenticatedClient(1, "admin", "Parent");
+        var deleteResponse = await client.DeleteAsync($"/chorelog/item/{logId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        var getResponse = await client.GetAsync($"/chorelog/{childId}");
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        var logs = await getResponse.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>();
+        Assert.DoesNotContain(logs!, l => l.Id == logId);
+    }
+
+    [Fact]
+    public async Task DeleteChoreLog_AsChild_ReturnsForbidden()
+    {
+        int childId = 0;
+        int logId = 0;
+        await _factory.SeedAsync(async db =>
+        {
+            var child = new User
+            {
+                Username = $"log_child_delete_{Guid.NewGuid():N}", PasswordHash = "x",
+                UserLevel = UserLevel.Child
+            };
+            db.Users.Add(child);
+            await db.SaveChangesAsync();
+            childId = child.Id;
+
+            var log = new ChoreLog
+            {
+                ChoreId = 1,
+                ChoreName = "Cannot delete",
+                ChildId = childId,
+                PerformedBy = childId,
+                Points = 1,
+                Timestamp = DateTimeOffset.UtcNow
+            };
+            db.ChoreLogs.Add(log);
+            await db.SaveChangesAsync();
+            logId = log.Id;
+        });
+
+        var client = _factory.CreateAuthenticatedClient(childId, "child_delete", "Child");
+        var response = await client.DeleteAsync($"/chorelog/item/{logId}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }

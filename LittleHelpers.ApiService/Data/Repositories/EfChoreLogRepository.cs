@@ -31,11 +31,17 @@ public sealed class EfChoreLogRepository(AppDbContext db) : IChoreLogRepository
                 (l, u) => new ChoreLogDto(l.Id, l.ChoreId, l.ChoreName, l.ChildId, l.PerformedBy, u.Username, l.Points, l.Timestamp))
             .ToListAsync();
 
+    public Task<ChoreLog?> GetTrackedByIdAsync(int id) =>
+        db.ChoreLogs
+            .FirstOrDefaultAsync(l => l.Id == id);
+
     public Task AddAsync(ChoreLog log)
     {
         db.ChoreLogs.Add(log);
         return Task.CompletedTask;
     }
+
+    public void Remove(ChoreLog log) => db.ChoreLogs.Remove(log);
 
     public Task SaveChangesAsync() => db.SaveChangesAsync();
 }

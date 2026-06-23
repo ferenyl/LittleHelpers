@@ -37,4 +37,8 @@ export class ChildrenService {
       `${environment.apiUrl}/chorelog/${childId}?year=${year}&month=${month}`
     );
   }
+
+  deleteLog(logId: number) {
+    return this.http.delete(`${environment.apiUrl}/chorelog/item/${logId}`);
+  }
 }

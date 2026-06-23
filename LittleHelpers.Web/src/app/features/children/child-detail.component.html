@@ -138,6 +138,20 @@
                 {{ log.points > 0 ? '+' : '' }}{{ log.points }} {{ 'common.points' | transloco }}
               </span>
               <span class="text-muted" style="min-width:100px;text-align:right">{{ log.timestamp | date:'d MMM HH:mm' }}</span>
+              @if (isParent()) {
+                <button
+                  type="button"
+                  class="btn btn-link btn-sm p-0 text-danger history-delete-btn"
+                  [attr.aria-label]="'childDetail.history.delete' | transloco"
+                  [title]="'childDetail.history.delete' | transloco"
+                  [disabled]="deletingHistoryId() === log.id"
+                  (click)="deleteHistoryItem(log)">
+                  <svg class="history-delete-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                    <path d="M5.5 5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 1 1 0-2H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1ZM4 4v9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4H4Zm3-2v.5h2V2H7Z" />
+                  </svg>
+                </button>
+              }
             </li>
           }
           @if (!logs().length) {
@@ -146,5 +160,30 @@
         </ul>
       </div>
     </div>
+
+    @if (pendingHistoryDelete(); as pendingDelete) {
+      <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ 'childDetail.history.confirmTitle' | transloco }}</h5>
+              <button type="button" class="btn-close" aria-label="Close" (click)="cancelHistoryDelete()"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-0">{{ 'childDetail.history.confirmDelete' | transloco: { choreName: pendingDelete.choreName } }}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelHistoryDelete()">
+                {{ 'common.cancel' | transloco }}
+              </button>
+              <button type="button" class="btn btn-danger" [disabled]="deletingHistoryId() === pendingDelete.id" (click)="confirmHistoryDelete()">
+                {{ 'childDetail.history.confirmAction' | transloco }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-backdrop fade show"></div>
+    }
   }
 </div>
