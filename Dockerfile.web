@@ -1,5 +1,5 @@
 # Stage 1: Build – installera beroenden separat för bra cache-lager
-FROM node:22-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 COPY LittleHelpers.Web/package.json LittleHelpers.Web/package-lock.json ./
 RUN npm ci --ignore-scripts
