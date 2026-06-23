@@ -7,9 +7,19 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "version": "0.0.0-dev",
+  "protocol_handlers": [
+    {
+      "protocol": "web+littlehelpers",
+      "url": "/?protocol=%s"
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -21,12 +31,28 @@
       "src": "/icons/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/favicon.ico",
       "type": "image/x-icon",
       "sizes": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/install-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Chores in LittleHelpers on desktop"
+    },
+    {
+      "src": "/screenshots/install-mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Chores in LittleHelpers on mobile"
     }
   ]
 }
