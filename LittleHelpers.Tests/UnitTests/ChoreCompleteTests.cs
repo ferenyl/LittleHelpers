@@ -72,9 +72,10 @@ public class ChoreCompleteTests : IDisposable
     [Fact]
     public async Task Complete_AssignedChild_CreatesChoreLog()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         SetUser(_child.Id, "child", "Child");
 
-        var result = await _handler.Handle(new CompleteChoreCommand(_chore.Id));
+        var result = await _handler.Handle(new CompleteChoreCommand(_chore.Id), cancellationToken);
 
         var log = _db.ChoreLogs.FirstOrDefault();
         Assert.NotNull(log);
@@ -89,20 +90,23 @@ public class ChoreCompleteTests : IDisposable
     [Fact]
     public async Task Complete_UnassignedChild_ReturnsForbid()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var otherChild = new User { Username = "other", PasswordHash = "x", UserLevel = UserLevel.Child };
         _db.Users.Add(otherChild);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken);
         SetUser(otherChild.Id, "other", "Child");
 
-        await Assert.ThrowsAsync<RequestAuthorizationException>(() => _handler.Handle(new CompleteChoreCommand(_chore.Id)));
+        await Assert.ThrowsAsync<RequestAuthorizationException>(() =>
+            _handler.Handle(new CompleteChoreCommand(_chore.Id), cancellationToken));
     }
 
     [Fact]
     public async Task Complete_Parent_UsesAssignedChildId()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         SetUser(_parent.Id, "parent", "Parent");
 
-        var result = await _handler.Handle(new CompleteChoreCommand(_chore.Id));
+        var result = await _handler.Handle(new CompleteChoreCommand(_chore.Id), cancellationToken);
 
         var log = _db.ChoreLogs.FirstOrDefault();
         Assert.NotNull(log);
@@ -115,14 +119,17 @@ public class ChoreCompleteTests : IDisposable
     [Fact]
     public async Task Complete_NonexistentChore_ReturnsNotFound()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         SetUser(_child.Id, "child", "Child");
 
-        await Assert.ThrowsAsync<RequestNotFoundException>(() => _handler.Handle(new CompleteChoreCommand(9999)));
+        await Assert.ThrowsAsync<RequestNotFoundException>(() =>
+            _handler.Handle(new CompleteChoreCommand(9999), cancellationToken));
     }
 
     [Fact]
     public async Task Complete_ExceedsMaxTimesPerDay_ReturnsBadRequest()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var chore = new Chore { Name = "Daily task", Points = 5, MaxTimesPerDay = 1 };
         _db.Chores.Add(chore);
         _db.SaveChanges();
@@ -132,16 +139,18 @@ public class ChoreCompleteTests : IDisposable
         SetUser(_child.Id, "child", "Child");
 
         // First completion should succeed
-        var result1 = await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        var result1 = await _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken);
         Assert.Equal(chore.Id, result1.ChoreId);
 
         // Second completion same day should fail
-        await Assert.ThrowsAsync<RequestValidationException>(() => _handler.Handle(new CompleteChoreCommand(chore.Id)));
+        await Assert.ThrowsAsync<RequestValidationException>(() =>
+            _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken));
     }
 
     [Fact]
     public async Task Complete_AfterNextDay_AllowsCompletionAgain()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var chore = new Chore { Name = "Daily task", Points = 5, MaxTimesPerDay = 1 };
         _db.Chores.Add(chore);
         _db.SaveChanges();
@@ -150,16 +159,17 @@ public class ChoreCompleteTests : IDisposable
 
         SetUser(_child.Id, "child", "Child");
 
-        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        await _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken);
         _dateTimeProvider.UtcNow = _dateTimeProvider.UtcNow.AddDays(1);
 
-        var result = await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        var result = await _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken);
         Assert.Equal(chore.Id, result.ChoreId);
     }
 
     [Fact]
     public async Task Complete_ViolatesTooSoonForMinDaysBetween_ReturnsBadRequest()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var chore = new Chore { Name = "Every other day", Points = 10, MinDaysBetween = 2 };
         _db.Chores.Add(chore);
         _db.SaveChanges();
@@ -169,15 +179,17 @@ public class ChoreCompleteTests : IDisposable
         SetUser(_child.Id, "child", "Child");
 
         // First completion
-        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        await _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken);
 
         // Try again immediately - should fail
-        await Assert.ThrowsAsync<RequestValidationException>(() => _handler.Handle(new CompleteChoreCommand(chore.Id)));
+        await Assert.ThrowsAsync<RequestValidationException>(() =>
+            _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken));
     }
 
     [Fact]
     public async Task Complete_ExceedsMaxTimesPerWeek_ReturnsBadRequest()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var chore = new Chore { Name = "Weekly task", Points = 15, MaxTimesPerWeek = 1 };
         _db.Chores.Add(chore);
         _db.SaveChanges();
@@ -187,15 +199,17 @@ public class ChoreCompleteTests : IDisposable
         SetUser(_child.Id, "child", "Child");
 
         // First completion in the week
-        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        await _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken);
 
         // Second completion same week should fail
-        await Assert.ThrowsAsync<RequestValidationException>(() => _handler.Handle(new CompleteChoreCommand(chore.Id)));
+        await Assert.ThrowsAsync<RequestValidationException>(() =>
+            _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken));
     }
 
     [Fact]
     public async Task Complete_Parent_CanOverrideFrequencyLimits()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var chore = new Chore { Name = "Weekly task", Points = 15, MaxTimesPerWeek = 1 };
         _db.Chores.Add(chore);
         _db.SaveChanges();
@@ -203,10 +217,10 @@ public class ChoreCompleteTests : IDisposable
         _db.SaveChanges();
 
         SetUser(_child.Id, "child", "Child");
-        await _handler.Handle(new CompleteChoreCommand(chore.Id));
+        await _handler.Handle(new CompleteChoreCommand(chore.Id), cancellationToken);
 
         SetUser(_parent.Id, "parent", "Parent");
-        var result = await _handler.Handle(new CompleteChoreCommand(chore.Id, _child.Id));
+        var result = await _handler.Handle(new CompleteChoreCommand(chore.Id, _child.Id), cancellationToken);
 
         Assert.Equal(chore.Id, result.ChoreId);
         Assert.Equal(_child.Id, result.ChildId);
