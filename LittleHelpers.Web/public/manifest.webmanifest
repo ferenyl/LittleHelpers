@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "LittleHelpers",
+  "short_name": "LittleHelpers",
+  "description": "Family chore management app.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "version": "0.0.0-dev",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}

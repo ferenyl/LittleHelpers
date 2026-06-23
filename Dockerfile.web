@@ -6,8 +6,10 @@ RUN npm ci --ignore-scripts
 
 # Stage 2: Kompilera Angular-appen
 FROM deps AS build
+ARG RELEASE_VERSION=0.0.0-dev
 COPY LittleHelpers.Web/ ./
-RUN npm run build -- --configuration=production
+RUN sed -i "s/\"version\": \"0.0.0-dev\"/\"version\": \"${RELEASE_VERSION}\"/g" public/manifest.webmanifest \
+    && npm run build -- --configuration=production
 
 # Stage 3: Runtime – minimal nginx-image
 FROM nginx:1.27-alpine AS runtime
@@ -20,6 +22,18 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Statiska filer från build-steget
 COPY --from=build /app/dist/littlehelpers-client/browser /usr/share/nginx/html
+COPY LittleHelpers.Web/docker-entrypoint/20-webapp-metadata.sh /docker-entrypoint.d/20-webapp-metadata.sh
+
+# Gör index/manifest templatable med envsubst vid containerstart.
+RUN cp /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.template \
+    && chmod +x /docker-entrypoint.d/20-webapp-metadata.sh \
+    && sed -i 's|<html lang="en"|<html lang="${WEBAPP_LANG}"|' /usr/share/nginx/html/index.html.template \
+    && sed -i 's|<title>LittleHelpers</title>|<title>${WEBAPP_TITLE}</title>|' /usr/share/nginx/html/index.html.template \
+    && cp /usr/share/nginx/html/manifest.webmanifest /usr/share/nginx/html/manifest.webmanifest.template \
+    && sed -i 's|"name": "LittleHelpers"|"name": "${WEBAPP_NAME}"|' /usr/share/nginx/html/manifest.webmanifest.template \
+    && sed -i 's|"short_name": "LittleHelpers"|"short_name": "${WEBAPP_SHORT_NAME}"|' /usr/share/nginx/html/manifest.webmanifest.template \
+    && sed -i 's|"description": "Family chore management app."|"description": "${WEBAPP_DESCRIPTION}"|' /usr/share/nginx/html/manifest.webmanifest.template \
+    && sed -i 's|"lang": "en"|"lang": "${WEBAPP_LANG}"|' /usr/share/nginx/html/manifest.webmanifest.template
 
 # Exponera port 80
 EXPOSE 80

@@ -61,6 +61,12 @@ services:
     environment:
       # nginx.conf.template substituerar detta till proxy_pass
       API_URL: http://apiservice
+      # Web app metadata (manifest + <title>)
+      WEBAPP_NAME: ${WEBAPP_NAME:-LittleHelpers}
+      WEBAPP_SHORT_NAME: ${WEBAPP_SHORT_NAME:-LittleHelpers}
+      WEBAPP_DESCRIPTION: ${WEBAPP_DESCRIPTION:-Family chore management app.}
+      WEBAPP_LANG: ${WEBAPP_LANG:-en}
+      WEBAPP_TITLE: ${WEBAPP_TITLE:-LittleHelpers}
     depends_on:
       apiservice:
         condition: service_healthy

@@ -29,6 +29,18 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # Force browser to revalidate web app manifest so install metadata updates quickly.
+    location = /manifest.webmanifest {
+        expires -1;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
+    # Ensure HTML metadata updates (title/lang) are picked up immediately after deploys.
+    location = /index.html {
+        expires -1;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
     # Caching för statiska filer med hash i namn
     location ~* \.(js|css|woff2?|ttf|eot|svg|ico|png|jpg|webp)$ {
         expires 1y;

@@ -126,7 +126,7 @@ docker run -d \
 
 ### Frontend image (`Dockerfile.web`)
 
-Multi-stage build: `node:22-alpine` for `ng build` → `nginx:1.27-alpine` serving static files (~21 MB). The nginx config is a template – `API_URL` is substituted at container startup via `envsubst`, so the proxy target can be changed without rebuilding.
+Multi-stage build: `node:22-alpine` for `ng build` → `nginx:1.27-alpine` serving static files (~21 MB). The nginx config is a template – `API_URL` is substituted at container startup via `envsubst`, so the proxy target can be changed without rebuilding. The same startup templating also supports runtime override of web app metadata (`name`, `short_name`, `description`, `lang`, and HTML `<title>`).
 
 ```bash
 # Build
@@ -142,6 +142,11 @@ docker push ghcr.io/yourorg/littlehelpers-web:1.0.0
 docker run -d \
   -p 80:80 \
   -e API_URL="http://apiservice" \
+  -e WEBAPP_NAME="My Family App" \
+  -e WEBAPP_SHORT_NAME="FamilyApp" \
+  -e WEBAPP_DESCRIPTION="Household chores and rewards" \
+  -e WEBAPP_LANG="en" \
+  -e WEBAPP_TITLE="My Family App" \
   littlehelpers-web:latest
 ```
 
@@ -176,6 +181,11 @@ Open `.env` and fill in all `CHANGE_ME` values:
 | `JWT_AUDIENCE` | JWT audience claim (default: `littlehelpers`) |
 | `SEED_ADMIN_PASSWORD` | Password for the initial admin account |
 | `WEB_PORT` | Host port the frontend listens on (default: `80`) |
+| `WEBAPP_NAME` | PWA `name` in manifest (default: `LittleHelpers`) |
+| `WEBAPP_SHORT_NAME` | PWA `short_name` in manifest (default: `LittleHelpers`) |
+| `WEBAPP_DESCRIPTION` | PWA description in manifest |
+| `WEBAPP_LANG` | Language used in manifest and `<html lang>` (default: `en`) |
+| `WEBAPP_TITLE` | Browser tab title (`<title>`) (default: `LittleHelpers`) |
 | `APISERVICE_IMAGE` | Override API image (optional, default: `littlehelpers-api:latest`) |
 | `WEBFRONTEND_IMAGE` | Override frontend image (optional, default: `littlehelpers-web:latest`) |
 
