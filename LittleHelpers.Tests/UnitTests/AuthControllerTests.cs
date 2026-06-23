@@ -46,7 +46,9 @@ public class AuthControllerTests : IDisposable
     [Fact]
     public async Task Login_ValidCredentials_ReturnsOkWithToken()
     {
-        var response = await _handler.Handle(new LoginQuery("parent1", "correct-password"));
+        var response = await _handler.Handle(
+            new LoginQuery("parent1", "correct-password"),
+            TestContext.Current.CancellationToken);
         Assert.NotEmpty(response.Token);
         Assert.Equal("parent1", response.Username);
     }
@@ -54,19 +56,23 @@ public class AuthControllerTests : IDisposable
     [Fact]
     public async Task Login_WrongPassword_ReturnsUnauthorized()
     {
-        await Assert.ThrowsAsync<RequestAuthenticationException>(() => _handler.Handle(new LoginQuery("parent1", "wrong-password")));
+        await Assert.ThrowsAsync<RequestAuthenticationException>(() =>
+            _handler.Handle(new LoginQuery("parent1", "wrong-password"), TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task Login_UnknownUsername_ReturnsUnauthorized()
     {
-        await Assert.ThrowsAsync<RequestAuthenticationException>(() => _handler.Handle(new LoginQuery("nobody", "any-password")));
+        await Assert.ThrowsAsync<RequestAuthenticationException>(() =>
+            _handler.Handle(new LoginQuery("nobody", "any-password"), TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task Login_ValidCredentials_TokenContainsCorrectClaims()
     {
-        var response = await _handler.Handle(new LoginQuery("parent1", "correct-password"));
+        var response = await _handler.Handle(
+            new LoginQuery("parent1", "correct-password"),
+            TestContext.Current.CancellationToken);
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(response.Token);
