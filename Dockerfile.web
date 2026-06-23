@@ -12,7 +12,7 @@ RUN sed -i "s/\"version\": \"0.0.0-dev\"/\"version\": \"${RELEASE_VERSION}\"/g" 
     && npm run build -- --configuration=production
 
 # Stage 3: Runtime – minimal nginx-image
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.31-alpine AS runtime
 
 # envsubst finns i gettext-paketet
 RUN apk add --no-cache gettext
