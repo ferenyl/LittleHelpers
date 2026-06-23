@@ -15,10 +15,10 @@ jobs:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
 
@@ -32,7 +32,7 @@ jobs:
         run: dotnet run --no-build --configuration Release --project LittleHelpers.Tests/LittleHelpers.Tests.csproj
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: "npm"
@@ -61,7 +61,7 @@ jobs:
       api_tags: ${{ steps.meta.outputs.api_tags }}
       web_tags: ${{ steps.meta.outputs.web_tags }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -114,7 +114,7 @@ jobs:
     if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v') && needs.tag-meta.outputs.on_main == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -156,7 +156,14 @@ jobs:
       contents: write
     steps:
       - name: Create release from tag
-        uses: softprops/action-gh-release@v2
-        with:
-          prerelease: ${{ needs.tag-meta.outputs.prerelease == 'true' }}
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ needs.tag-meta.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$PRERELEASE" == "true" ]]; then
+            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --prerelease
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes
+          fi
