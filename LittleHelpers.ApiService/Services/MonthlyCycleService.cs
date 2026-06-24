@@ -41,7 +41,7 @@ public sealed class MonthlyCycleService(IOptions<MonthlyCycleOptions> options) :
     }
 
     public MonthlyCyclePeriod GetPeriodForMonth(int year, int month) =>
-        CreatePeriod(year, month);
+        CreateDisplayMonthPeriod(year, month);
 
     private DateTimeOffset CreateCycleStart(int year, int month)
     {
@@ -63,6 +63,18 @@ public sealed class MonthlyCycleService(IOptions<MonthlyCycleOptions> options) :
         return new MonthlyCyclePeriod(
             periodStart.Year,
             periodStart.Month,
+            periodStart,
+            periodEnd);
+    }
+
+    private MonthlyCyclePeriod CreateDisplayMonthPeriod(int year, int month)
+    {
+        var periodEnd = CreateCycleStart(year, month);
+        var (previousYear, previousMonth) = GetPreviousMonth(year, month);
+        var periodStart = CreateCycleStart(previousYear, previousMonth);
+        return new MonthlyCyclePeriod(
+            year,
+            month,
             periodStart,
             periodEnd);
     }
