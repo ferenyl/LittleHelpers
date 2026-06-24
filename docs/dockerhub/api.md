@@ -14,6 +14,12 @@ docker run -d \
   -e Jwt__RenewTokenLifetimeHours="336" \
   -e SeedAdminPassword="YourAdminPassword123!" \
   -e MonthlyCycle__BreakpointDay="1" \
+  -e FirebaseNotifications__Active="false" \
+  -e FirebaseNotifications__ProjectId="" \
+  -e FirebaseNotifications__PrivateKeyId="" \
+  -e FirebaseNotifications__PrivateKey="" \
+  -e FirebaseNotifications__ClientEmail="" \
+  -e FirebaseNotifications__ClientId="" \
   -e ConnectionStrings__littlehelpers="Host=db;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   ferenyl/littlehelpers.api:latest
 ```
@@ -32,6 +38,12 @@ A running PostgreSQL instance is required. See [docker-compose](#docker-compose)
 | `Jwt__RenewTokenLifetimeHours` | ❌ | Renewed token lifetime in hours (default: `336`) |
 | `SeedAdminPassword` | ✅ | Password for the auto-created `admin` account |
 | `MonthlyCycle__BreakpointDay` | ❌ | Day in month when a new allowance cycle starts (`1-31`, default: `1`; falls back to last day when needed) |
+| `FirebaseNotifications__Active` | ❌ | Enable/disable Firebase notifications (`true`/`false`, default: `false`) |
+| `FirebaseNotifications__ProjectId` | ❌ | Firebase project id (required if notifications are active) |
+| `FirebaseNotifications__PrivateKeyId` | ❌ | Firebase service account private key id |
+| `FirebaseNotifications__PrivateKey` | ❌ | Firebase service account private key, use `\n` for new lines |
+| `FirebaseNotifications__ClientEmail` | ❌ | Firebase service account client email |
+| `FirebaseNotifications__ClientId` | ❌ | Firebase service account client id |
 
 > Generate a strong JWT key: `openssl rand -base64 48`
 
@@ -81,6 +93,12 @@ services:
       Jwt__RenewTokenLifetimeHours: "336"
       SeedAdminPassword: "YourAdminPassword123!"
       MonthlyCycle__BreakpointDay: "1"
+      FirebaseNotifications__Active: "false"
+      FirebaseNotifications__ProjectId: ""
+      FirebaseNotifications__PrivateKeyId: ""
+      FirebaseNotifications__PrivateKey: ""
+      FirebaseNotifications__ClientEmail: ""
+      FirebaseNotifications__ClientId: ""
     depends_on:
       - db
 ```

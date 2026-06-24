@@ -66,6 +66,14 @@ The API requires a JWT signing key and a seed admin password. These must be set 
   "SeedAdminPassword": "YourAdminPassword123!",
   "MonthlyCycle": {
     "BreakpointDay": 1
+  },
+  "FirebaseNotifications": {
+    "Active": false,
+    "ProjectId": "",
+    "PrivateKeyId": "",
+    "PrivateKey": "",
+    "ClientEmail": "",
+    "ClientId": ""
   }
 }
 ```
@@ -128,6 +136,12 @@ docker run -d \
   -e Jwt__RenewTokenLifetimeHours="336" \
   -e SeedAdminPassword="YourAdminPassword123!" \
   -e MonthlyCycle__BreakpointDay="1" \
+  -e FirebaseNotifications__Active="false" \
+  -e FirebaseNotifications__ProjectId="" \
+  -e FirebaseNotifications__PrivateKeyId="" \
+  -e FirebaseNotifications__PrivateKey="" \
+  -e FirebaseNotifications__ClientEmail="" \
+  -e FirebaseNotifications__ClientId="" \
   -e ConnectionStrings__littlehelpers="Host=localhost;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   littlehelpers-api:latest
 ```
@@ -191,6 +205,12 @@ Open `.env` and fill in all `CHANGE_ME` values:
 | `JWT_RENEW_TOKEN_LIFETIME_HOURS` | Renewed token lifetime in hours (default: `336`) |
 | `SEED_ADMIN_PASSWORD` | Password for the initial admin account |
 | `MONTHLY_CYCLE_BREAKPOINT_DAY` | Day in month when a new allowance cycle starts (`1-31`, default: `1`; falls back to last day when needed) |
+| `FIREBASE_NOTIFICATIONS_ACTIVE` | Enable/disable Firebase notifications (`true`/`false`, default: `false`) |
+| `FIREBASE_PROJECT_ID` | Firebase project id (required when notifications are active) |
+| `FIREBASE_PRIVATE_KEY_ID` | Service account private key id (optional) |
+| `FIREBASE_PRIVATE_KEY` | Service account private key, use `\n` for line breaks in env value |
+| `FIREBASE_CLIENT_EMAIL` | Service account client email |
+| `FIREBASE_CLIENT_ID` | Service account client id (optional) |
 | `WEB_PORT` | Host port the frontend listens on (default: `80`) |
 | `WEBAPP_NAME` | PWA `name` in manifest (default: `LittleHelpers`) |
 | `WEBAPP_SHORT_NAME` | PWA `short_name` in manifest (default: `LittleHelpers`) |

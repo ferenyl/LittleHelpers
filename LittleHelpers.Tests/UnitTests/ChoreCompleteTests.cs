@@ -4,6 +4,7 @@ using LittleHelpers.ApiService.Application.Cqrs;
 using LittleHelpers.ApiService.Data;
 using LittleHelpers.ApiService.Data.Repositories;
 using LittleHelpers.ApiService.Models;
+using LittleHelpers.ApiService.Services.Notifications;
 using LittleHelpers.ApiService.Services;
 using LittleHelpers.ApiService.Services.Realtime;
 using Microsoft.AspNetCore.Http;
@@ -25,6 +26,7 @@ public class ChoreCompleteTests : IDisposable
     private readonly CompleteChoreCommandHandler _handler;
     private readonly FakeDateTimeProvider _dateTimeProvider;
     private readonly IChildRealtimeNotifier _realtimeNotifier;
+    private readonly INotificationService _notificationService;
 
     private readonly User _parent;
     private readonly User _child;
@@ -51,11 +53,13 @@ public class ChoreCompleteTests : IDisposable
 
         _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         _realtimeNotifier = Substitute.For<IChildRealtimeNotifier>();
+        _notificationService = Substitute.For<INotificationService>();
         _dateTimeProvider = new FakeDateTimeProvider(new DateTimeOffset(2026, 6, 13, 10, 0, 0, TimeSpan.Zero));
         _handler = new CompleteChoreCommandHandler(
             new EfChoreRepository(_db),
             new EfChoreLogRepository(_db),
             new ChoreAvailabilityService(),
+            _notificationService,
             _realtimeNotifier,
             _httpContextAccessor,
             _dateTimeProvider);
@@ -90,6 +94,12 @@ public class ChoreCompleteTests : IDisposable
         Assert.Equal(_chore.Id, result.ChoreId);
         Assert.Equal(_child.Id, result.ChildId);
         await _realtimeNotifier.Received(1).NotifyChildUpdatedAsync(_child.Id, "chore_completed", cancellationToken);
+        await _notificationService.Received(1).NotifyPointsGivenAsync(
+            "child",
+            _child.Id,
+            _chore.Points,
+            _chore.Name,
+            cancellationToken);
     }
 
     [Fact]

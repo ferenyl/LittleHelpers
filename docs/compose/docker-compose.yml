@@ -43,6 +43,13 @@ services:
       SeedAdminPassword: ${SEED_ADMIN_PASSWORD}
       # Månadscykel: dag i månaden då ny period börjar (1-31, fallback till sista dag)
       MonthlyCycle__BreakpointDay: ${MONTHLY_CYCLE_BREAKPOINT_DAY:-1}
+      # Firebase-notiser
+      FirebaseNotifications__Active: ${FIREBASE_NOTIFICATIONS_ACTIVE:-false}
+      FirebaseNotifications__ProjectId: ${FIREBASE_PROJECT_ID:-}
+      FirebaseNotifications__PrivateKeyId: ${FIREBASE_PRIVATE_KEY_ID:-}
+      FirebaseNotifications__PrivateKey: ${FIREBASE_PRIVATE_KEY:-}
+      FirebaseNotifications__ClientEmail: ${FIREBASE_CLIENT_EMAIL:-}
+      FirebaseNotifications__ClientId: ${FIREBASE_CLIENT_ID:-}
     expose:
       - "80"
     depends_on:

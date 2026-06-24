@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using LittleHelpers.ApiService.Application.Cqrs;
 using LittleHelpers.ApiService.Models;
+using LittleHelpers.ApiService.Services.Notifications;
 using LittleHelpers.ApiService.Services.Realtime;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ public sealed class CompleteChoreCommandHandler(
     IChoreRepository choreRepository,
     IChoreLogRepository choreLogRepository,
     IChoreAvailabilityService availabilityService,
+    INotificationService notificationService,
     IChildRealtimeNotifier realtimeNotifier,
     IHttpContextAccessor httpContext,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<CompleteChoreCommand, ChoreLogDto>
@@ -60,8 +62,10 @@ public sealed class CompleteChoreCommandHandler(
 
         await choreLogRepository.AddAsync(log);
         await choreLogRepository.SaveChangesAsync();
+        var actorName = user.FindFirstValue(ClaimTypes.Name) ?? "Unknown user";
+        await notificationService.NotifyPointsGivenAsync(actorName, childId, chore.Points, chore.Name, cancellationToken);
         await realtimeNotifier.NotifyChildUpdatedAsync(childId, "chore_completed", cancellationToken);
 
-        return DtoFactory.CreateChoreLogDto(log, user.FindFirstValue(ClaimTypes.Name) ?? "");
+        return DtoFactory.CreateChoreLogDto(log, actorName);
     }
 }

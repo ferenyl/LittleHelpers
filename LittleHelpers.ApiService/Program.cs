@@ -1,6 +1,7 @@
 using System.Text;
 using LittleHelpers.ApiService.Data;
 using LittleHelpers.ApiService.Models;
+using LittleHelpers.ApiService.Services.Notifications;
 using LittleHelpers.ApiService.Services.Realtime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -71,15 +72,20 @@ builder.Services.AddOptions<MonthlyCycleOptions>()
     .BindConfiguration(MonthlyCycleOptions.SectionName)
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<FirebaseNotificationOptions>()
+    .BindConfiguration(FirebaseNotificationOptions.SectionName);
 builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 builder.Services.AddScoped<IChildRepository, EfChildRepository>();
 builder.Services.AddScoped<IChoreRepository, EfChoreRepository>();
 builder.Services.AddScoped<IChoreLogRepository, EfChoreLogRepository>();
 builder.Services.AddScoped<IChoreAvailabilityService, ChoreAvailabilityService>();
+builder.Services.AddSingleton<IFirebaseNotificationSender, FirebaseNotificationSender>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IChildRealtimeNotifier, SignalRChildRealtimeNotifier>();
 builder.Services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
 builder.Services.AddScoped<IMonthlyCycleService, MonthlyCycleService>();
 builder.Services.AddScoped<JwtTokenFactory>();
+builder.Services.AddHostedService<MorningNotificationsHostedService>();
 builder.Services.AddDecoratedQueryHandler<GetUsersQuery, IReadOnlyList<UserDto>, GetUsersQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetUserByIdQuery, UserDto, GetUserByIdQueryHandler>();
 builder.Services.AddDecoratedCommandHandler<CreateUserCommand, UserDto, CreateUserCommandHandler>();
