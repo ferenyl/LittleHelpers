@@ -131,6 +131,7 @@
     "chart": {
       "heading": "Poäng – {{ month }} {{ year }}"
     },
+    "cycleRange": "Cykel",
     "history": {
       "heading": "Historik",
       "showLess": "Visa färre",

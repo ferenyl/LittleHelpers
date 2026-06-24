@@ -41,7 +41,9 @@ public sealed class MonthlyCycleService(IOptions<MonthlyCycleOptions> options) :
     }
 
     public MonthlyCyclePeriod GetPeriodForMonth(int year, int month) =>
-        CreateDisplayMonthPeriod(year, month);
+        _breakpointDay == 1
+            ? CreatePeriod(year, month)
+            : CreateDisplayMonthPeriod(year, month);
 
     private DateTimeOffset CreateCycleStart(int year, int month)
     {

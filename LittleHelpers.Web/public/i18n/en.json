@@ -131,6 +131,7 @@
     "chart": {
       "heading": "Points – {{ month }} {{ year }}"
     },
+    "cycleRange": "Cycle",
     "history": {
       "heading": "History",
       "showLess": "Show fewer",

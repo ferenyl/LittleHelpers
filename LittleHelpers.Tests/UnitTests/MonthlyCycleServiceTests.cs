@@ -78,4 +78,17 @@ public class MonthlyCycleServiceTests
         Assert.Equal(new DateTimeOffset(2028, 2, 29, 0, 0, 0, TimeSpan.Zero), period.StartInclusive);
         Assert.Equal(new DateTimeOffset(2028, 3, 31, 0, 0, 0, TimeSpan.Zero), period.EndExclusive);
     }
+
+    [Fact]
+    public void GetPeriodForMonth_Breakpoint1_UsesCalendarMonth()
+    {
+        var service = CreateService(1);
+
+        var period = service.GetPeriodForMonth(2026, 6);
+
+        Assert.Equal(new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero), period.StartInclusive);
+        Assert.Equal(new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.Zero), period.EndExclusive);
+        Assert.Equal(2026, period.Year);
+        Assert.Equal(6, period.Month);
+    }
 }

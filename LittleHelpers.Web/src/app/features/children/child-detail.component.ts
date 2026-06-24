@@ -32,6 +32,8 @@ export class ChildDetailComponent implements OnInit, OnDestroy {
 
   child = signal<ChildSummaryDto | null>(null);
   logs = signal<ChoreLogDto[]>([]);
+  periodStart = signal<Date | null>(null);
+  periodEnd = signal<Date | null>(null);
   loading = signal(true);
   historyExpanded = signal(false);
   completing = signal<number | null>(null);
@@ -45,6 +47,18 @@ export class ChildDetailComponent implements OnInit, OnDestroy {
 
   translatedMonth = computed(() => this.transloco.translate(`months.${this.month()}`));
   monthLabel = computed(() => `${this.translatedMonth()} ${this.year()}`);
+  cycleDateRange = computed(() => {
+    const start = this.periodStart();
+    const end = this.periodEnd();
+    if (!start || !end) {
+      return null;
+    }
+
+    return {
+      start,
+      end,
+    };
+  });
 
   visibleHistory = computed(() =>
     this.historyExpanded() ? this.logs() : this.logs().slice(0, 5)
@@ -171,7 +185,14 @@ export class ChildDetailComponent implements OnInit, OnDestroy {
   }
 
   loadLogs() {
-    this.childSvc.getLogs(this.childId, this.year(), this.month()).subscribe(l => this.logs.set(l));
+    this.childSvc.getLogs(this.childId, this.year(), this.month()).subscribe(period => {
+      this.logs.set(period.logs);
+      const start = new Date(period.periodStartInclusive);
+      const endExclusive = new Date(period.periodEndExclusive);
+      const end = new Date(endExclusive.getTime() - (24 * 60 * 60 * 1000));
+      this.periodStart.set(start);
+      this.periodEnd.set(end);
+    });
   }
 
   prevMonth() {

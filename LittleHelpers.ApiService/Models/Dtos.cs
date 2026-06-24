@@ -12,6 +12,10 @@ public record CreateChoreRequest(string Name, int Points, List<int> AssignedUser
 public record UpdateChoreRequest(string? Name, int? Points, bool? IsHidden, List<int>? AssignedUserIds, int? MaxTimesPerDay = null, int? MinDaysBetween = null, int? MaxTimesPerWeek = null);
 
 public record ChoreLogDto(int Id, int ChoreId, string ChoreName, int ChildId, int PerformedBy, string PerformedByName, int Points, DateTimeOffset Timestamp);
+public record ChoreLogPeriodDto(
+    IReadOnlyList<ChoreLogDto> Logs,
+    DateTimeOffset PeriodStartInclusive,
+    DateTimeOffset PeriodEndExclusive);
 
 public record ChildSummaryDto(int Id, string Username, int TotalPoints, decimal? MonthlyAllowance, int? PointsGoal, IEnumerable<ChoreDto> AssignedChores, IEnumerable<Link> Links);
 

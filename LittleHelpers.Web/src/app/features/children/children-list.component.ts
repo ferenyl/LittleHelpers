@@ -13,6 +13,8 @@ interface DayPoint { day: number; cumulative: number; }
 interface ChartAxis { yTicks: { value: number; y: number }[]; xTicks: { day: number; x: number }[] }
 interface ExpandedData {
   logs: ChoreLogDto[];
+  periodStart: Date | null;
+  periodEnd: Date | null;
   parentChores: ChoreDto[];
   svgPath: string;
   chartAxis: ChartAxis;
@@ -78,7 +80,7 @@ export class ChildrenListComponent implements OnInit {
 
   private patchExpanded(childId: number, patch: Partial<ExpandedData>) {
     const map = new Map(this.expandedData());
-    map.set(childId, { ...(map.get(childId) ?? { logs: [], parentChores: [], svgPath: '', chartAxis: { yTicks: [], xTicks: [] }, completing: null, loading: false }), ...patch });
+    map.set(childId, { ...(map.get(childId) ?? { logs: [], periodStart: null, periodEnd: null, parentChores: [], svgPath: '', chartAxis: { yTicks: [], xTicks: [] }, completing: null, loading: false }), ...patch });
     this.expandedData.set(map);
   }
 
@@ -110,6 +112,8 @@ export class ChildrenListComponent implements OnInit {
 
     this.patchExpanded(childId, {
       logs: [],
+      periodStart: null,
+      periodEnd: null,
       parentChores: [],
       svgPath: '',
       chartAxis: { yTicks: [], xTicks: [] },
@@ -122,14 +126,19 @@ export class ChildrenListComponent implements OnInit {
       detail: this.svc.getById(childId),
       logs: this.svc.getLogs(childId, now.getFullYear(), now.getMonth() + 1),
     }).subscribe({
-      next: ({ detail, logs }) => {
+      next: ({ detail, logs: period }) => {
         const parentChores = detail.assignedChores.filter(c => !c.assignedUserIds.includes(childId));
+        const start = new Date(period.periodStartInclusive);
+        const endExclusive = new Date(period.periodEndExclusive);
+        const end = new Date(endExclusive.getTime() - (24 * 60 * 60 * 1000));
         this.patchExpanded(childId, {
-          logs,
+          logs: period.logs,
+          periodStart: start,
+          periodEnd: end,
           parentChores,
           completing: null,
           loading: false,
-          ...this.buildChart(logs, now),
+          ...this.buildChart(period.logs, now),
         });
       },
       error: () => this.patchExpanded(childId, { loading: false }),

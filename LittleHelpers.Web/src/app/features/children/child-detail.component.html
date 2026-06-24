@@ -14,6 +14,11 @@
       <div class="card border-success mb-4">
         <div class="card-body">
           <h5 class="card-title text-success">{{ 'childDetail.allowance.title' | transloco: { month: translatedMonth(), year: year() } }}</h5>
+          @if (cycleDateRange(); as cycle) {
+            <div class="text-muted small mb-2">
+              {{ 'childDetail.cycleRange' | transloco }}: {{ cycle.start | date:'d MMM' }} – {{ cycle.end | date:'d MMM' }}
+            </div>
+          }
           <div class="d-flex justify-content-between align-items-center mb-1 small">
             <span>{{ totalPoints() }} / {{ c.pointsGoal }} {{ 'childDetail.allowance.points' | transloco }}</span>
             <span class="fw-bold">{{ allowancePct() }}%</span>
@@ -100,6 +105,11 @@
             <button class="btn btn-outline-secondary" (click)="nextMonth()">›</button>
           </div>
         </div>
+        @if (cycleDateRange(); as cycle) {
+          <div class="text-muted small mb-2">
+            {{ 'childDetail.cycleRange' | transloco }}: {{ cycle.start | date:'d MMM' }} – {{ cycle.end | date:'d MMM' }}
+          </div>
+        }
         <svg class="w-100" viewBox="0 0 600 160" preserveAspectRatio="none">
           <line x1="40" y1="120" x2="580" y2="120" stroke="#dee2e6" stroke-width="1"/>
           <line x1="40" y1="20" x2="40" y2="120" stroke="#dee2e6" stroke-width="1"/>
@@ -129,6 +139,11 @@
             </button>
           }
         </div>
+        @if (cycleDateRange(); as cycle) {
+          <div class="text-muted small mb-2">
+            {{ 'childDetail.cycleRange' | transloco }}: {{ cycle.start | date:'d MMM' }} – {{ cycle.end | date:'d MMM' }}
+          </div>
+        }
         <ul class="list-unstyled mb-0">
           @for (log of visibleHistory(); track log.id) {
             <li class="d-flex gap-2 align-items-baseline border-bottom py-2 small">
