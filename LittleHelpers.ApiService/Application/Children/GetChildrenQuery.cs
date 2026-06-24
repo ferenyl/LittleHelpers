@@ -10,14 +10,18 @@ public sealed class GetChildrenQueryHandler(
     IChildRepository childRepository,
     IChoreLogRepository choreLogRepository,
     IHttpContextAccessor httpContext,
-    IDateTimeProvider dateTimeProvider) : IQueryHandler<GetChildrenQuery, IReadOnlyList<ChildSummaryDto>>
+    IDateTimeProvider dateTimeProvider,
+    IMonthlyCycleService monthlyCycleService) : IQueryHandler<GetChildrenQuery, IReadOnlyList<ChildSummaryDto>>
 {
     public async Task<IReadOnlyList<ChildSummaryDto>> Handle(GetChildrenQuery request, CancellationToken cancellationToken = default)
     {
         var children = await childRepository.GetChildrenWithAssignmentsAsync();
-        var now = dateTimeProvider.UtcNow;
+        var period = monthlyCycleService.GetCurrentPeriod(dateTimeProvider.UtcNow);
         var childIds = children.Select(c => c.Id).ToList();
-        var monthPoints = await choreLogRepository.GetMonthlyPointsAsync(childIds, now);
+        var monthPoints = await choreLogRepository.GetMonthlyPointsAsync(
+            childIds,
+            period.StartInclusive,
+            period.EndExclusive);
 
         var lw = new LinkWriter<ChildSummaryDto>(httpContext)
             .AddLink("self", "GET", c => $"/children/{c.Id}");

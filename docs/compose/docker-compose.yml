@@ -41,6 +41,8 @@ services:
       Jwt__RenewTokenLifetimeHours: ${JWT_RENEW_TOKEN_LIFETIME_HOURS:-336}
       # Seed-konto (skapas vid första start om det inte finns)
       SeedAdminPassword: ${SEED_ADMIN_PASSWORD}
+      # Månadscykel: dag i månaden då ny period börjar (1-31, fallback till sista dag)
+      MonthlyCycle__BreakpointDay: ${MONTHLY_CYCLE_BREAKPOINT_DAY:-1}
     expose:
       - "80"
     depends_on:

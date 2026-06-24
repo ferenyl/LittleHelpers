@@ -50,12 +50,17 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddOptions<MonthlyCycleOptions>()
+    .BindConfiguration(MonthlyCycleOptions.SectionName)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 builder.Services.AddScoped<IChildRepository, EfChildRepository>();
 builder.Services.AddScoped<IChoreRepository, EfChoreRepository>();
 builder.Services.AddScoped<IChoreLogRepository, EfChoreLogRepository>();
 builder.Services.AddScoped<IChoreAvailabilityService, ChoreAvailabilityService>();
 builder.Services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
+builder.Services.AddScoped<IMonthlyCycleService, MonthlyCycleService>();
 builder.Services.AddScoped<JwtTokenFactory>();
 builder.Services.AddDecoratedQueryHandler<GetUsersQuery, IReadOnlyList<UserDto>, GetUsersQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetUserByIdQuery, UserDto, GetUserByIdQueryHandler>();

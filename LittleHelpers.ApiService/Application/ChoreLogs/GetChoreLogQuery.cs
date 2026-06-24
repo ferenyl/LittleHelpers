@@ -10,13 +10,21 @@ public sealed record GetChoreLogQuery(int ChildId, int? Year = null, int? Month 
 
 public sealed class GetChoreLogQueryHandler(
     IChoreLogRepository choreLogRepository,
-    IDateTimeProvider dateTimeProvider) : IQueryHandler<GetChoreLogQuery, IReadOnlyList<ChoreLogDto>>
+    IDateTimeProvider dateTimeProvider,
+    IMonthlyCycleService monthlyCycleService) : IQueryHandler<GetChoreLogQuery, IReadOnlyList<ChoreLogDto>>
 {
     public async Task<IReadOnlyList<ChoreLogDto>> Handle(GetChoreLogQuery request, CancellationToken cancellationToken = default)
     {
         var now = dateTimeProvider.UtcNow;
-        var filterYear = request.Year ?? now.Year;
-        var filterMonth = request.Month ?? now.Month;
-        return await choreLogRepository.GetForChildAsync(request.ChildId, filterYear, filterMonth);
+        var period = request.Year is null && request.Month is null
+            ? monthlyCycleService.GetCurrentPeriod(now)
+            : monthlyCycleService.GetPeriodForMonth(
+                request.Year ?? now.Year,
+                request.Month ?? now.Month);
+
+        return await choreLogRepository.GetForChildAsync(
+            request.ChildId,
+            period.StartInclusive,
+            period.EndExclusive);
     }
 }

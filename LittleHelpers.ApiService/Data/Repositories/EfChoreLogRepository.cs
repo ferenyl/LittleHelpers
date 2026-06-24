@@ -5,10 +5,16 @@ namespace LittleHelpers.ApiService.Data.Repositories;
 
 public sealed class EfChoreLogRepository(AppDbContext db) : IChoreLogRepository
 {
-    public Task<Dictionary<int, int>> GetMonthlyPointsAsync(IReadOnlyCollection<int> childIds, DateTimeOffset now) =>
+    public Task<Dictionary<int, int>> GetMonthlyPointsAsync(
+        IReadOnlyCollection<int> childIds,
+        DateTimeOffset periodStartInclusive,
+        DateTimeOffset periodEndExclusive) =>
         db.ChoreLogs
             .AsNoTracking()
-            .Where(l => childIds.Contains(l.ChildId) && l.Timestamp.Year == now.Year && l.Timestamp.Month == now.Month)
+            .Where(l =>
+                childIds.Contains(l.ChildId)
+                && l.Timestamp >= periodStartInclusive
+                && l.Timestamp < periodEndExclusive)
             .GroupBy(l => l.ChildId)
             .Select(g => new { ChildId = g.Key, Points = g.Sum(l => l.Points) })
             .ToDictionaryAsync(x => x.ChildId, x => x.Points);
@@ -20,10 +26,16 @@ public sealed class EfChoreLogRepository(AppDbContext db) : IChoreLogRepository
             .OrderByDescending(l => l.Timestamp)
             .ToListAsync();
 
-    public Task<List<ChoreLogDto>> GetForChildAsync(int childId, int year, int month) =>
+    public Task<List<ChoreLogDto>> GetForChildAsync(
+        int childId,
+        DateTimeOffset periodStartInclusive,
+        DateTimeOffset periodEndExclusive) =>
         db.ChoreLogs
             .AsNoTracking()
-            .Where(l => l.ChildId == childId && l.Timestamp.Year == year && l.Timestamp.Month == month)
+            .Where(l =>
+                l.ChildId == childId
+                && l.Timestamp >= periodStartInclusive
+                && l.Timestamp < periodEndExclusive)
             .OrderByDescending(l => l.Timestamp)
             .Join(db.Users.AsNoTracking(),
                 l => l.PerformedBy,

@@ -13,6 +13,7 @@ docker run -d \
   -e Jwt__AccessTokenLifetimeHours="168" \
   -e Jwt__RenewTokenLifetimeHours="336" \
   -e SeedAdminPassword="YourAdminPassword123!" \
+  -e MonthlyCycle__BreakpointDay="1" \
   -e ConnectionStrings__littlehelpers="Host=db;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   ferenyl/littlehelpers.api:latest
 ```
@@ -30,6 +31,7 @@ A running PostgreSQL instance is required. See [docker-compose](#docker-compose)
 | `Jwt__AccessTokenLifetimeHours` | ❌ | Access token lifetime in hours (default: `168`) |
 | `Jwt__RenewTokenLifetimeHours` | ❌ | Renewed token lifetime in hours (default: `336`) |
 | `SeedAdminPassword` | ✅ | Password for the auto-created `admin` account |
+| `MonthlyCycle__BreakpointDay` | ❌ | Day in month when a new allowance cycle starts (`1-31`, default: `1`; falls back to last day when needed) |
 
 > Generate a strong JWT key: `openssl rand -base64 48`
 
@@ -78,6 +80,7 @@ services:
       Jwt__AccessTokenLifetimeHours: "168"
       Jwt__RenewTokenLifetimeHours: "336"
       SeedAdminPassword: "YourAdminPassword123!"
+      MonthlyCycle__BreakpointDay: "1"
     depends_on:
       - db
 ```
