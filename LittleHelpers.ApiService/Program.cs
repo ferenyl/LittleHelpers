@@ -1,6 +1,7 @@
 using System.Text;
 using LittleHelpers.ApiService.Data;
 using LittleHelpers.ApiService.Models;
+using LittleHelpers.ApiService.Services.Realtime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtKey))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken)
+                    && path.StartsWithSegments("/realtime/updates"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorizationBuilder()
@@ -59,6 +76,7 @@ builder.Services.AddScoped<IChildRepository, EfChildRepository>();
 builder.Services.AddScoped<IChoreRepository, EfChoreRepository>();
 builder.Services.AddScoped<IChoreLogRepository, EfChoreLogRepository>();
 builder.Services.AddScoped<IChoreAvailabilityService, ChoreAvailabilityService>();
+builder.Services.AddScoped<IChildRealtimeNotifier, SignalRChildRealtimeNotifier>();
 builder.Services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
 builder.Services.AddScoped<IMonthlyCycleService, MonthlyCycleService>();
 builder.Services.AddScoped<JwtTokenFactory>();
@@ -81,6 +99,7 @@ builder.Services.AddDecoratedCommandHandler<UpdateChoreCommand, ChoreDto, Update
 builder.Services.AddDecoratedCommandHandler<DeleteChoreCommand, Unit, DeleteChoreCommandHandler>();
 builder.Services.AddDecoratedCommandHandler<CompleteChoreCommand, ChoreLogDto, CompleteChoreCommandHandler>();
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -122,6 +141,7 @@ app.UseAuthorization();
 app.MapGet("/", () => "LittleHelpers API is running.").AllowAnonymous();
 app.MapDefaultEndpoints();
 app.MapControllers();
+app.MapHub<ChildUpdatesHub>("/realtime/updates");
 
 app.Run();
 

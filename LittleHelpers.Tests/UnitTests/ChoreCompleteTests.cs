@@ -5,6 +5,7 @@ using LittleHelpers.ApiService.Data;
 using LittleHelpers.ApiService.Data.Repositories;
 using LittleHelpers.ApiService.Models;
 using LittleHelpers.ApiService.Services;
+using LittleHelpers.ApiService.Services.Realtime;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
@@ -23,6 +24,7 @@ public class ChoreCompleteTests : IDisposable
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly CompleteChoreCommandHandler _handler;
     private readonly FakeDateTimeProvider _dateTimeProvider;
+    private readonly IChildRealtimeNotifier _realtimeNotifier;
 
     private readonly User _parent;
     private readonly User _child;
@@ -48,11 +50,13 @@ public class ChoreCompleteTests : IDisposable
         _db.SaveChanges();
 
         _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+        _realtimeNotifier = Substitute.For<IChildRealtimeNotifier>();
         _dateTimeProvider = new FakeDateTimeProvider(new DateTimeOffset(2026, 6, 13, 10, 0, 0, TimeSpan.Zero));
         _handler = new CompleteChoreCommandHandler(
             new EfChoreRepository(_db),
             new EfChoreLogRepository(_db),
             new ChoreAvailabilityService(),
+            _realtimeNotifier,
             _httpContextAccessor,
             _dateTimeProvider);
     }
@@ -85,6 +89,7 @@ public class ChoreCompleteTests : IDisposable
         Assert.Equal(10, log.Points);
         Assert.Equal(_chore.Id, result.ChoreId);
         Assert.Equal(_child.Id, result.ChildId);
+        await _realtimeNotifier.Received(1).NotifyChildUpdatedAsync(_child.Id, "chore_completed", cancellationToken);
     }
 
     [Fact]

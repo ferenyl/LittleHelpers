@@ -1,10 +1,13 @@
-import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, DestroyRef, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
 import { forkJoin } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoModule } from '@jsverse/transloco';
 import { ChildrenService, ChildSummaryDto, ChoreLogDto } from '../../core/children.service';
 import { ChoreService, ChoreDto } from '../../core/chore.service';
+import { RealtimeService } from '../../core/realtime.service';
 
 interface DayPoint { day: number; cumulative: number; }
 interface ChartAxis { yTicks: { value: number; y: number }[]; xTicks: { day: number; x: number }[] }
@@ -28,6 +31,8 @@ interface ExpandedData {
 export class ChildrenListComponent implements OnInit {
   private svc = inject(ChildrenService);
   private choreSvc = inject(ChoreService);
+  private realtime = inject(RealtimeService);
+  private destroyRef = inject(DestroyRef);
 
   children = signal<ChildSummaryDto[]>([]);
   loading = signal(true);
@@ -35,36 +40,33 @@ export class ChildrenListComponent implements OnInit {
   expandedData = signal<Map<number, ExpandedData>>(new Map());
 
   ngOnInit() {
-    this.svc.getAll().subscribe({ next: c => { this.children.set(c); this.loading.set(false); } });
+    this.loadChildren(true);
+    this.realtime.childUpdates$
+      .pipe(
+        filter(update => this.children().some(child => child.id === update.childId)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(update => {
+        this.loadChildren();
+        if (this.expandedId() === update.childId) {
+          this.loadExpanded(update.childId);
+        }
+      });
   }
 
   toggle(child: ChildSummaryDto) {
     if (this.expandedId() === child.id) { this.expandedId.set(null); return; }
     this.expandedId.set(child.id);
-    if (this.expandedData().has(child.id)) return;
-
-    this.patchExpanded(child.id, { logs: [], parentChores: [], svgPath: '', chartAxis: { yTicks: [], xTicks: [] }, completing: null, loading: true });
-
-    const now = new Date();
-    forkJoin({
-      detail: this.svc.getById(child.id),
-      logs: this.svc.getLogs(child.id, now.getFullYear(), now.getMonth() + 1),
-    }).subscribe(({ detail, logs }) => {
-      const parentChores = detail.assignedChores.filter(c => !c.assignedUserIds.includes(child.id));
-      this.patchExpanded(child.id, { logs, parentChores, completing: null, loading: false, ...this.buildChart(logs, now) });
-    });
+    this.loadExpanded(child.id);
   }
 
   completeParentChore(choreId: number, child: ChildSummaryDto) {
     this.patchExpanded(child.id, { completing: choreId });
     this.choreSvc.complete(choreId, child.id).subscribe({
       next: () => {
-        const now = new Date();
-        this.svc.getLogs(child.id, now.getFullYear(), now.getMonth() + 1).subscribe(logs => {
-          const totalPoints = logs.reduce((s, l) => s + l.points, 0);
-          this.children.update(list => list.map(c => c.id === child.id ? { ...c, totalPoints } : c));
-          this.patchExpanded(child.id, { logs, completing: null, ...this.buildChart(logs, now) });
-        });
+        this.patchExpanded(child.id, { completing: null });
+        this.loadChildren();
+        this.loadExpanded(child.id);
       },
       error: () => this.patchExpanded(child.id, { completing: null }),
     });
@@ -78,6 +80,60 @@ export class ChildrenListComponent implements OnInit {
     const map = new Map(this.expandedData());
     map.set(childId, { ...(map.get(childId) ?? { logs: [], parentChores: [], svgPath: '', chartAxis: { yTicks: [], xTicks: [] }, completing: null, loading: false }), ...patch });
     this.expandedData.set(map);
+  }
+
+  private loadChildren(setLoading = false) {
+    if (setLoading) {
+      this.loading.set(true);
+    }
+
+    this.svc.getAll().subscribe({
+      next: children => {
+        this.children.set(children);
+        this.realtime.setTrackedChildren(children.map(child => child.id));
+        if (setLoading) {
+          this.loading.set(false);
+        }
+      },
+      error: () => {
+        if (setLoading) {
+          this.loading.set(false);
+        }
+      },
+    });
+  }
+
+  private loadExpanded(childId: number) {
+    if (this.expandedData().has(childId) && this.getExpanded(childId)?.loading) {
+      return;
+    }
+
+    this.patchExpanded(childId, {
+      logs: [],
+      parentChores: [],
+      svgPath: '',
+      chartAxis: { yTicks: [], xTicks: [] },
+      completing: null,
+      loading: true,
+    });
+
+    const now = new Date();
+    forkJoin({
+      detail: this.svc.getById(childId),
+      logs: this.svc.getLogs(childId, now.getFullYear(), now.getMonth() + 1),
+    }).subscribe({
+      next: ({ detail, logs }) => {
+        const parentChores = detail.assignedChores.filter(c => !c.assignedUserIds.includes(childId));
+        this.patchExpanded(childId, {
+          logs,
+          parentChores,
+          completing: null,
+          loading: false,
+          ...this.buildChart(logs, now),
+        });
+      },
+      error: () => this.patchExpanded(childId, { loading: false }),
+    });
   }
 
   private buildChart(logs: ChoreLogDto[], now: Date): { svgPath: string; chartAxis: ChartAxis } {

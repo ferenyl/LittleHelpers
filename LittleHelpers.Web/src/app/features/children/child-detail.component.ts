@@ -1,10 +1,13 @@
-import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChildrenService, ChildSummaryDto, ChoreLogDto } from '../../core/children.service';
 import { ChoreService } from '../../core/chore.service';
 import { AuthService } from '../../core/auth.service';
+import { RealtimeService } from '../../core/realtime.service';
 
 interface DayPoint { day: number; points: number; cumulative: number; }
 interface ChoreConfirmation { id: number; name: string; }
@@ -18,12 +21,14 @@ interface HistoryDeleteConfirmation { id: number; choreName: string; }
   templateUrl: './child-detail.component.html',
   styleUrl: './child-detail.component.scss',
 })
-export class ChildDetailComponent implements OnInit {
+export class ChildDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private childSvc = inject(ChildrenService);
   private choreSvc = inject(ChoreService);
   private auth = inject(AuthService);
   private transloco = inject(TranslocoService);
+  private realtime = inject(RealtimeService);
+  private destroyRef = inject(DestroyRef);
 
   child = signal<ChildSummaryDto | null>(null);
   logs = signal<ChoreLogDto[]>([]);
@@ -130,8 +135,39 @@ export class ChildDetailComponent implements OnInit {
   get childId() { return +this.route.snapshot.paramMap.get('id')!; }
 
   ngOnInit() {
-    this.childSvc.getById(this.childId).subscribe(c => { this.child.set(c); this.loading.set(false); });
+    this.loadChild(true);
     this.loadLogs();
+    this.realtime.trackChild(this.childId);
+    this.realtime.childUpdates$
+      .pipe(
+        filter(update => update.childId === this.childId),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.refreshFromServer());
+  }
+
+  ngOnDestroy() {
+    this.realtime.untrackChild(this.childId);
+  }
+
+  loadChild(setLoading = false) {
+    if (setLoading) {
+      this.loading.set(true);
+    }
+
+    this.childSvc.getById(this.childId).subscribe({
+      next: child => {
+        this.child.set(child);
+        if (setLoading) {
+          this.loading.set(false);
+        }
+      },
+      error: () => {
+        if (setLoading) {
+          this.loading.set(false);
+        }
+      },
+    });
   }
 
   loadLogs() {
@@ -200,7 +236,7 @@ export class ChildDetailComponent implements OnInit {
     this.deletingHistoryId.set(pending.id);
     this.childSvc.deleteLog(pending.id).subscribe({
       next: () => {
-        this.logs.update(items => items.filter(item => item.id !== pending.id));
+        this.refreshFromServer();
         this.deletingHistoryId.set(null);
       },
       error: () => this.deletingHistoryId.set(null),
@@ -214,9 +250,17 @@ export class ChildDetailComponent implements OnInit {
   private completeNow(choreId: number) {
     this.completing.set(choreId);
     this.choreSvc.complete(choreId, this.childId).subscribe({
-      next: () => { this.completing.set(null); this.loadLogs(); },
+      next: () => {
+        this.completing.set(null);
+        this.refreshFromServer();
+      },
       error: () => this.completing.set(null),
     });
+  }
+
+  private refreshFromServer() {
+    this.loadChild();
+    this.loadLogs();
   }
 
   private requiresTouchConfirmation() {

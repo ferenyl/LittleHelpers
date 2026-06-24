@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using LittleHelpers.ApiService.Application.Cqrs;
 using LittleHelpers.ApiService.Models;
+using LittleHelpers.ApiService.Services.Realtime;
 using Microsoft.EntityFrameworkCore;
 
 namespace LittleHelpers.ApiService.Application.Chores;
@@ -12,6 +13,7 @@ public sealed class CompleteChoreCommandHandler(
     IChoreRepository choreRepository,
     IChoreLogRepository choreLogRepository,
     IChoreAvailabilityService availabilityService,
+    IChildRealtimeNotifier realtimeNotifier,
     IHttpContextAccessor httpContext,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<CompleteChoreCommand, ChoreLogDto>
 {
@@ -58,6 +60,7 @@ public sealed class CompleteChoreCommandHandler(
 
         await choreLogRepository.AddAsync(log);
         await choreLogRepository.SaveChangesAsync();
+        await realtimeNotifier.NotifyChildUpdatedAsync(childId, "chore_completed", cancellationToken);
 
         return DtoFactory.CreateChoreLogDto(log, user.FindFirstValue(ClaimTypes.Name) ?? "");
     }
