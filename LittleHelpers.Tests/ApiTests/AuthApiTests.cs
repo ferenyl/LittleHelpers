@@ -71,4 +71,25 @@ public class AuthApiTests : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Renew_WithValidToken_ReturnsNewToken()
+    {
+        HttpClient authedClient = null!;
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await _factory.SeedAsync(async db =>
+        {
+            var user = ApiFactory.MakeParent("renew_parent");
+            db.Users.Add(user);
+            await db.SaveChangesAsync(cancellationToken);
+            authedClient = _factory.CreateAuthenticatedClient(user.Id, user.Username, "Parent");
+        });
+
+        var response = await authedClient.PostAsync("/auth/renew", content: null, cancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<RenewTokenResponse>(cancellationToken);
+        Assert.NotNull(body?.Token);
+    }
 }

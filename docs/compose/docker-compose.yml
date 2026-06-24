@@ -37,6 +37,8 @@ services:
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: ${JWT_ISSUER:-littlehelpers}
       Jwt__Audience: ${JWT_AUDIENCE:-littlehelpers}
+      Jwt__AccessTokenLifetimeHours: ${JWT_ACCESS_TOKEN_LIFETIME_HOURS:-168}
+      Jwt__RenewTokenLifetimeHours: ${JWT_RENEW_TOKEN_LIFETIME_HOURS:-336}
       # Seed-konto (skapas vid första start om det inte finns)
       SeedAdminPassword: ${SEED_ADMIN_PASSWORD}
     expose:

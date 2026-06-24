@@ -10,6 +10,10 @@ export interface LoginResponse {
   userLevel: string;
 }
 
+export interface RenewTokenResponse {
+  token: string;
+}
+
 export interface MenuItemDto {
   label: string;
   route: string;
@@ -34,12 +38,15 @@ export class AuthService {
   login(username: string, password: string) {
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { username, password }).pipe(
       tap(res => {
-        localStorage.setItem(this.tokenKey, res.token);
-        localStorage.setItem('lh_username', res.username);
-        localStorage.setItem('lh_userlevel', res.userLevel);
-        this._token.set(res.token);
-        this._username.set(res.username);
-        this._userLevel.set(res.userLevel);
+        this.setSession(res.token, res.username, res.userLevel);
+      })
+    );
+  }
+
+  renewToken() {
+    return this.http.post<RenewTokenResponse>(`${environment.apiUrl}/auth/renew`, {}).pipe(
+      tap(res => {
+        this.setSession(res.token, this._username(), this._userLevel());
       })
     );
   }
@@ -56,6 +63,21 @@ export class AuthService {
 
   getMenu() {
     return this.http.get<MenuItemDto[]>(`${environment.apiUrl}/menu`);
+  }
+
+  private setSession(token: string, username: string | null, userLevel: string | null) {
+    localStorage.setItem(this.tokenKey, token);
+    this._token.set(token);
+
+    if (username) {
+      localStorage.setItem('lh_username', username);
+      this._username.set(username);
+    }
+
+    if (userLevel) {
+      localStorage.setItem('lh_userlevel', userLevel);
+      this._userLevel.set(userLevel);
+    }
   }
 
   getUserIdFromToken(): string | null {

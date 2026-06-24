@@ -10,6 +10,8 @@ docker run -d \
   -e Jwt__Key="your-secret-key-min-32-characters-long" \
   -e Jwt__Issuer="littlehelpers" \
   -e Jwt__Audience="littlehelpers" \
+  -e Jwt__AccessTokenLifetimeHours="168" \
+  -e Jwt__RenewTokenLifetimeHours="336" \
   -e SeedAdminPassword="YourAdminPassword123!" \
   -e ConnectionStrings__littlehelpers="Host=db;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   ferenyl/littlehelpers.api:latest
@@ -25,6 +27,8 @@ A running PostgreSQL instance is required. See [docker-compose](#docker-compose)
 | `Jwt__Key` | ✅ | JWT signing key, minimum 32 characters |
 | `Jwt__Issuer` | ✅ | JWT issuer claim (e.g. `littlehelpers`) |
 | `Jwt__Audience` | ✅ | JWT audience claim (e.g. `littlehelpers`) |
+| `Jwt__AccessTokenLifetimeHours` | ❌ | Access token lifetime in hours (default: `168`) |
+| `Jwt__RenewTokenLifetimeHours` | ❌ | Renewed token lifetime in hours (default: `336`) |
 | `SeedAdminPassword` | ✅ | Password for the auto-created `admin` account |
 
 > Generate a strong JWT key: `openssl rand -base64 48`
@@ -71,6 +75,8 @@ services:
       Jwt__Key: "your-secret-key-min-32-characters-long"
       Jwt__Issuer: "littlehelpers"
       Jwt__Audience: "littlehelpers"
+      Jwt__AccessTokenLifetimeHours: "168"
+      Jwt__RenewTokenLifetimeHours: "336"
       SeedAdminPassword: "YourAdminPassword123!"
     depends_on:
       - db

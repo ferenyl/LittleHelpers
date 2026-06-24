@@ -63,4 +63,23 @@ describe('AuthService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
+
+  it('renewToken updates stored token', () => {
+    service.login('admin', 'pass').subscribe();
+    http.expectOne(req => req.url.includes('/auth/login')).flush({
+      token: 'old.jwt.token',
+      username: 'admin',
+      userLevel: 'Parent',
+    });
+
+    service.renewToken().subscribe();
+    const req = http.expectOne(r => r.url.includes('/auth/renew'));
+    expect(req.request.method).toBe('POST');
+    req.flush({ token: 'new.jwt.token' });
+
+    expect(localStorage.getItem('lh_token')).toBe('new.jwt.token');
+    expect(service.token()).toBe('new.jwt.token');
+    expect(service.username()).toBe('admin');
+    expect(service.userLevel()).toBe('Parent');
+  });
 });

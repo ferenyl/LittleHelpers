@@ -59,7 +59,9 @@ The API requires a JWT signing key and a seed admin password. These must be set 
 ```json
 {
   "Jwt": {
-    "Key": "your-secret-key-min-32-characters-long"
+    "Key": "your-secret-key-min-32-characters-long",
+    "AccessTokenLifetimeHours": 168,
+    "RenewTokenLifetimeHours": 336
   },
   "SeedAdminPassword": "YourAdminPassword123!"
 }
@@ -119,6 +121,8 @@ docker push ghcr.io/yourorg/littlehelpers-api:1.0.0
 docker run -d \
   -p 80:80 \
   -e Jwt__Key="your-secret-key-min-32-characters" \
+  -e Jwt__AccessTokenLifetimeHours="168" \
+  -e Jwt__RenewTokenLifetimeHours="336" \
   -e SeedAdminPassword="YourAdminPassword123!" \
   -e ConnectionStrings__littlehelpers="Host=localhost;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   littlehelpers-api:latest
@@ -179,6 +183,8 @@ Open `.env` and fill in all `CHANGE_ME` values:
 | `JWT_KEY` | JWT signing key, minimum 32 characters |
 | `JWT_ISSUER` | JWT issuer claim (default: `littlehelpers`) |
 | `JWT_AUDIENCE` | JWT audience claim (default: `littlehelpers`) |
+| `JWT_ACCESS_TOKEN_LIFETIME_HOURS` | Access token lifetime in hours (default: `168`) |
+| `JWT_RENEW_TOKEN_LIFETIME_HOURS` | Renewed token lifetime in hours (default: `336`) |
 | `SEED_ADMIN_PASSWORD` | Password for the initial admin account |
 | `WEB_PORT` | Host port the frontend listens on (default: `80`) |
 | `WEBAPP_NAME` | PWA `name` in manifest (default: `LittleHelpers`) |
@@ -243,6 +249,13 @@ curl -X POST http://localhost/api/auth/login \
 ```
 
 The response includes a JWT Bearer token. All endpoints except `/api/auth/login` and `/api/health` require the `Authorization: Bearer <token>` header.
+
+To renew an active token, call:
+
+```bash
+curl -X POST http://localhost/api/auth/renew \
+  -H "Authorization: Bearer <token>"
+```
 
 ---
 
