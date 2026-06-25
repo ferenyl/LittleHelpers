@@ -45,16 +45,43 @@ describe('AuthService', () => {
     expect(localStorage.getItem('lh_token')).toBe('fake.jwt.token');
   });
 
-  it('logout clears token and sets isLoggedIn to false', () => {
+  it('logout clears token and sets isLoggedIn to false', async () => {
     localStorage.setItem('lh_token', 'fake.jwt.token');
     localStorage.setItem('lh_username', 'admin');
     localStorage.setItem('lh_userlevel', 'Parent');
 
-    service.logout();
+    await service.logout();
 
     expect(service.isLoggedIn()).toBe(false);
     expect(service.username()).toBeNull();
     expect(localStorage.getItem('lh_token')).toBeNull();
+  });
+
+  it('notifies session observers on login and logout', async () => {
+    const afterLogin = vi.fn();
+    const beforeLogout = vi.fn(async () => undefined);
+    service.registerSessionObserver({ afterLogin, beforeLogout });
+
+    service.login('admin', 'pass').subscribe();
+    http.expectOne(req => req.url.includes('/auth/login')).flush({
+      token: 'fake.jwt.token',
+      username: 'admin',
+      userLevel: 'Parent',
+    });
+
+    expect(afterLogin).toHaveBeenCalledWith({
+      token: 'fake.jwt.token',
+      username: 'admin',
+      userLevel: 'Parent',
+    });
+
+    await service.logout();
+
+    expect(beforeLogout).toHaveBeenCalledWith({
+      token: 'fake.jwt.token',
+      username: 'admin',
+      userLevel: 'Parent',
+    });
   });
 
   it('getMenu calls correct endpoint', () => {

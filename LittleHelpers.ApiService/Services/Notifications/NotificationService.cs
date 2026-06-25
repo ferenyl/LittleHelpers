@@ -12,8 +12,6 @@ public sealed class NotificationService(
     IOptions<MonthlyCycleOptions> monthlyCycleOptions,
     ILogger<NotificationService> logger) : INotificationService
 {
-    private const string ParentsTopic = "parents";
-
     public async Task NotifyPointsGivenAsync(
         string actorName,
         int childId,
@@ -25,10 +23,11 @@ public sealed class NotificationService(
         if (child is null)
             return;
 
-        var forParents = $"{actorName} has given {child.Username} {chorePoints} {choreName}";
-        var forChild = $"{child.Username} has been given {chorePoints} by doing {choreName}";
-        await TrySendAsync(ParentsTopic, forParents, cancellationToken);
-        await TrySendAsync(GetChildTopic(child.Id), forChild, cancellationToken);
+        var forParents = $"{actorName} gave {child.Username} {chorePoints} points for {choreName}.";
+        var forChild = $"{child.Username} earned {chorePoints} points for {choreName}.";
+        var childLink = $"/children/{child.Id}";
+        await TrySendAsync(NotificationTopics.Parents, "Points updated", forParents, childLink, cancellationToken);
+        await TrySendAsync(NotificationTopics.Child(child.Id), "Points earned", forChild, childLink, cancellationToken);
     }
 
     public async Task NotifyPointsRemovedAsync(
@@ -38,9 +37,14 @@ public sealed class NotificationService(
         string choreName,
         CancellationToken cancellationToken = default)
     {
-        var message = $"{actorName} has removed {chorePoints} points {choreName}";
-        await TrySendAsync(ParentsTopic, message, cancellationToken);
-        await TrySendAsync(GetChildTopic(childId), message, cancellationToken);
+        var child = await userRepository.GetByIdAsync(childId);
+        if (child is null)
+            return;
+
+        var message = $"{actorName} removed {chorePoints} points from {child.Username} for {choreName}.";
+        var childLink = $"/children/{child.Id}";
+        await TrySendAsync(NotificationTopics.Parents, "Points updated", message, childLink, cancellationToken);
+        await TrySendAsync(NotificationTopics.Child(child.Id), "Points removed", message, childLink, cancellationToken);
     }
 
     public async Task SendMorningNotificationsAsync(CancellationToken cancellationToken = default)
@@ -66,20 +70,28 @@ public sealed class NotificationService(
             var totalPoints = monthlyPoints.GetValueOrDefault(child.Id, 0);
             var earnedAmount = CalculateEarnedAmount(child, totalPoints);
             var message = isBreakpointDay
-                ? $"Time for Allowance! you have earned {earnedAmount}"
-                : $"You have {totalPoints} you have earned {earnedAmount} of {child.MonthlyAllowance ?? 0}.";
+                ? $"Allowance time. You have earned {earnedAmount}."
+                : $"You have {totalPoints} points and have earned {earnedAmount} of {child.MonthlyAllowance ?? 0}.";
 
-            await TrySendAsync(GetChildTopic(child.Id), message, cancellationToken);
+            await TrySendAsync(
+                NotificationTopics.Child(child.Id),
+                "Allowance update",
+                message,
+                $"/children/{child.Id}",
+                cancellationToken);
         }
     }
 
-    private static string GetChildTopic(int childId) => $"child-{childId}";
-
-    private async Task TrySendAsync(string topic, string message, CancellationToken cancellationToken)
+    private async Task TrySendAsync(
+        string topic,
+        string title,
+        string message,
+        string? link,
+        CancellationToken cancellationToken)
     {
         try
         {
-            await firebaseSender.SendToTopicAsync(topic, message, cancellationToken);
+            await firebaseSender.SendToTopicAsync(topic, title, message, link, cancellationToken);
         }
         catch (Exception ex)
         {

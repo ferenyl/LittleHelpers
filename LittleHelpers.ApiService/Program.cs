@@ -94,7 +94,7 @@ builder.Services.AddDecoratedCommandHandler<DeleteUserCommand, Unit, DeleteUserC
 builder.Services.AddDecoratedQueryHandler<LoginQuery, LoginResponse, LoginQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<RenewTokenQuery, RenewTokenResponse, RenewTokenQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetMenuQuery, IReadOnlyList<MenuItemDto>, GetMenuQueryHandler>();
-builder.Services.AddDecoratedQueryHandler<GetChoreLogQuery, IReadOnlyList<ChoreLogDto>, GetChoreLogQueryHandler>();
+builder.Services.AddDecoratedQueryHandler<GetChoreLogQuery, ChoreLogPeriodDto, GetChoreLogQueryHandler>();
 builder.Services.AddDecoratedCommandHandler<DeleteChoreLogCommand, Unit, DeleteChoreLogCommandHandler>();
 builder.Services.AddDecoratedQueryHandler<GetChildrenQuery, IReadOnlyList<ChildSummaryDto>, GetChildrenQueryHandler>();
 builder.Services.AddDecoratedQueryHandler<GetChildDetailQuery, ChildSummaryDto, GetChildDetailQueryHandler>();

@@ -214,8 +214,8 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
         var response = await client.GetAsync($"/chorelog/{childId}", cancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var logs = await response.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>(cancellationToken);
-        Assert.Contains(logs!, l => l.ChildId == childId);
+        var period = await response.Content.ReadFromJsonAsync<ChoreLogPeriodDto>(cancellationToken);
+        Assert.Contains(period!.Logs, l => l.ChildId == childId);
     }
 
     [Fact]
@@ -244,9 +244,9 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
         var response = await client.GetAsync($"/chorelog/{childId}?year=2025&month=1", cancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var logs = await response.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>(cancellationToken);
-        Assert.All(logs!, l => Assert.Equal(2025, l.Timestamp.Year));
-        Assert.All(logs!, l => Assert.Equal(1, l.Timestamp.Month));
+        var period = await response.Content.ReadFromJsonAsync<ChoreLogPeriodDto>(cancellationToken);
+        Assert.All(period!.Logs, l => Assert.Equal(2025, l.Timestamp.Year));
+        Assert.All(period.Logs, l => Assert.Equal(1, l.Timestamp.Month));
     }
 
     [Fact]
@@ -280,8 +280,8 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
         var response = await client.GetAsync($"/chorelog/{childId}", cancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var logs = await response.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>(cancellationToken);
-        Assert.Contains(logs!, l => l.ChildId == childId);
+        var period = await response.Content.ReadFromJsonAsync<ChoreLogPeriodDto>(cancellationToken);
+        Assert.Contains(period!.Logs, l => l.ChildId == childId);
     }
 
     [Fact]
@@ -322,8 +322,8 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
 
         var getResponse = await client.GetAsync($"/chorelog/{childId}", cancellationToken);
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var logs = await getResponse.Content.ReadFromJsonAsync<IEnumerable<ChoreLogDto>>(cancellationToken);
-        Assert.DoesNotContain(logs!, l => l.Id == logId);
+        var period = await getResponse.Content.ReadFromJsonAsync<ChoreLogPeriodDto>(cancellationToken);
+        Assert.DoesNotContain(period!.Logs, l => l.Id == logId);
     }
 
     [Fact]

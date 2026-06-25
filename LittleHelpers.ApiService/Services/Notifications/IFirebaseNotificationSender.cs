@@ -2,5 +2,9 @@ namespace LittleHelpers.ApiService.Services.Notifications;
 
 public interface IFirebaseNotificationSender
 {
-    Task SendToTopicAsync(string topic, string body, CancellationToken cancellationToken = default);
+    bool IsActive { get; }
+    FirebaseWebPushConfigurationDto GetWebPushConfiguration();
+    Task SendToTopicAsync(string topic, string title, string body, string? link = null, CancellationToken cancellationToken = default);
+    Task SubscribeToTopicAsync(string topic, string registrationToken, CancellationToken cancellationToken = default);
+    Task UnsubscribeFromTopicAsync(string topic, string registrationToken, CancellationToken cancellationToken = default);
 }

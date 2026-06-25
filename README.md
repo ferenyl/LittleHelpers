@@ -73,7 +73,14 @@ The API requires a JWT signing key and a seed admin password. These must be set 
     "PrivateKeyId": "",
     "PrivateKey": "",
     "ClientEmail": "",
-    "ClientId": ""
+    "ClientId": "",
+    "WebAppUrl": "",
+    "WebApiKey": "",
+    "WebAuthDomain": "",
+    "WebStorageBucket": "",
+    "WebMessagingSenderId": "",
+    "WebAppId": "",
+    "WebVapidKey": ""
   }
 }
 ```
@@ -142,6 +149,13 @@ docker run -d \
   -e FirebaseNotifications__PrivateKey="" \
   -e FirebaseNotifications__ClientEmail="" \
   -e FirebaseNotifications__ClientId="" \
+  -e FirebaseNotifications__WebAppUrl="" \
+  -e FirebaseNotifications__WebApiKey="" \
+  -e FirebaseNotifications__WebAuthDomain="" \
+  -e FirebaseNotifications__WebStorageBucket="" \
+  -e FirebaseNotifications__WebMessagingSenderId="" \
+  -e FirebaseNotifications__WebAppId="" \
+  -e FirebaseNotifications__WebVapidKey="" \
   -e ConnectionStrings__littlehelpers="Host=localhost;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   littlehelpers-api:latest
 ```
@@ -211,6 +225,13 @@ Open `.env` and fill in all `CHANGE_ME` values:
 | `FIREBASE_PRIVATE_KEY` | Service account private key, use `\n` for line breaks in env value |
 | `FIREBASE_CLIENT_EMAIL` | Service account client email |
 | `FIREBASE_CLIENT_ID` | Service account client id (optional) |
+| `FIREBASE_WEB_APP_URL` | Public web app URL used as the notification click target, e.g. `https://littlehelpers.example.com` |
+| `FIREBASE_WEB_API_KEY` | Firebase Web app API key (required for browser push notifications) |
+| `FIREBASE_WEB_AUTH_DOMAIN` | Firebase Web app auth domain, e.g. `project-id.firebaseapp.com` |
+| `FIREBASE_WEB_STORAGE_BUCKET` | Firebase Web app storage bucket |
+| `FIREBASE_WEB_MESSAGING_SENDER_ID` | Firebase Web app messaging sender id |
+| `FIREBASE_WEB_APP_ID` | Firebase Web app app id |
+| `FIREBASE_WEB_VAPID_KEY` | Firebase Web Push certificate public key (VAPID) |
 | `WEB_PORT` | Host port the frontend listens on (default: `80`) |
 | `WEBAPP_NAME` | PWA `name` in manifest (default: `LittleHelpers`) |
 | `WEBAPP_SHORT_NAME` | PWA `short_name` in manifest (default: `LittleHelpers`) |
@@ -221,6 +242,17 @@ Open `.env` and fill in all `CHANGE_ME` values:
 | `WEBFRONTEND_IMAGE` | Override frontend image (optional, default: `littlehelpers-web:latest`) |
 
 > **Never commit `.env` to version control.** It is listed in `.gitignore`.
+
+### Web push notifications
+
+Browser push notifications use Firebase Cloud Messaging end-to-end. To enable them:
+
+1. Keep `FIREBASE_NOTIFICATIONS_ACTIVE=true`.
+2. Configure both the Firebase **service account** fields and the **Web app** fields above.
+3. Generate or import a **Web Push certificate** in Firebase and set `FIREBASE_WEB_VAPID_KEY`.
+4. Serve the web app over **HTTPS** (required by browser service workers, except on localhost).
+
+When configured, the web client requests notification permission after login, registers an FCM token, and subscribes it to the authenticated user's topic.
 
 ### Build and start
 

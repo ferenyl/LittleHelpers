@@ -26,3 +26,17 @@ vi.stubGlobal('matchMedia', (query: string) => ({
   removeEventListener: () => {},
   dispatchEvent: () => false,
 }));
+
+vi.stubGlobal('Notification', {
+  permission: 'default',
+  requestPermission: vi.fn(async () => 'granted'),
+});
+
+Object.defineProperty(globalThis.navigator, 'serviceWorker', {
+  value: {
+    register: vi.fn(async () => ({
+      showNotification: vi.fn(async () => undefined),
+    })),
+  },
+  configurable: true,
+});

@@ -24,6 +24,12 @@ export interface ChoreLogDto {
   timestamp: string;
 }
 
+export interface ChoreLogPeriodDto {
+  logs: ChoreLogDto[];
+  periodStartInclusive: string;
+  periodEndExclusive: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChildrenService {
   private http = inject(HttpClient);
@@ -33,7 +39,7 @@ export class ChildrenService {
   getById(id: number) { return this.http.get<ChildSummaryDto>(`${this.base}/${id}`); }
 
   getLogs(childId: number, year: number, month: number) {
-    return this.http.get<ChoreLogDto[]>(
+    return this.http.get<ChoreLogPeriodDto>(
       `${environment.apiUrl}/chorelog/${childId}?year=${year}&month=${month}`
     );
   }

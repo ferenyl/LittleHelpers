@@ -5,7 +5,7 @@ namespace LittleHelpers.ApiService.Controllers;
 [ApiController]
 [Route("chorelog")]
 public class ChoreLogController(
-    IQueryHandler<GetChoreLogQuery, IReadOnlyList<ChoreLogDto>> getChoreLog,
+    IQueryHandler<GetChoreLogQuery, ChoreLogPeriodDto> getChoreLog,
     ICommandHandler<DeleteChoreLogCommand, Unit> deleteChoreLog) : ControllerBase
 {
     [HttpGet("{childId}")]

@@ -83,7 +83,11 @@ describe('ChildrenListComponent', () => {
     const cmp = fixture.componentInstance;
     const svc = TestBed.inject(ChildrenService);
     vi.spyOn(svc, 'getById').mockReturnValue(of({ ...makeChild(), assignedChores: [] }));
-    vi.spyOn(svc, 'getLogs').mockReturnValue(of([]));
+    vi.spyOn(svc, 'getLogs').mockReturnValue(of({
+      logs: [],
+      periodStartInclusive: new Date('2026-05-27T00:00:00.000Z').toISOString(),
+      periodEndExclusive: new Date('2026-06-27T00:00:00.000Z').toISOString(),
+    }));
 
     const child = makeChild();
     cmp.toggle(child);

@@ -9,6 +9,7 @@ namespace LittleHelpers.ApiService.Services.Notifications;
 public sealed class FirebaseNotificationSender : IFirebaseNotificationSender
 {
     private readonly ILogger<FirebaseNotificationSender> _logger;
+    private readonly FirebaseNotificationOptions _config;
     private readonly bool _active;
 
     public FirebaseNotificationSender(
@@ -16,15 +17,15 @@ public sealed class FirebaseNotificationSender : IFirebaseNotificationSender
         ILogger<FirebaseNotificationSender> logger)
     {
         _logger = logger;
-        var config = options.Value;
+        _config = options.Value;
 
-        if (!config.Active)
+        if (!_config.Active)
         {
             _active = false;
             return;
         }
 
-        if (!HasRequiredKeys(config))
+        if (!_config.HasRequiredAdminKeys())
         {
             _active = false;
             _logger.LogInformation(
@@ -32,24 +33,76 @@ public sealed class FirebaseNotificationSender : IFirebaseNotificationSender
             return;
         }
 
-        _active = TryEnsureFirebaseApp(config);
+        _active = TryEnsureFirebaseApp(_config);
     }
 
-    public async Task SendToTopicAsync(string topic, string body, CancellationToken cancellationToken = default)
+    public bool IsActive => _active;
+
+    public FirebaseWebPushConfigurationDto GetWebPushConfiguration() =>
+        _config.ToWebPushConfiguration(_active);
+
+    public async Task SendToTopicAsync(
+        string topic,
+        string title,
+        string body,
+        string? link = null,
+        CancellationToken cancellationToken = default)
     {
         if (!_active)
             return;
 
+        var absoluteLink = BuildAbsoluteLink(link);
         var message = new Message
         {
             Topic = topic,
             Notification = new Notification
             {
+                Title = title,
                 Body = body
+            },
+            Data = BuildData(link),
+            Webpush = new WebpushConfig
+            {
+                Notification = new WebpushNotification
+                {
+                    Title = title,
+                    Body = body,
+                    Icon = "/icons/icon-192.png"
+                },
+                FcmOptions = absoluteLink is null
+                    ? null
+                    : new WebpushFcmOptions
+                    {
+                        Link = absoluteLink
+                    }
             }
         };
 
         await FirebaseMessaging.DefaultInstance.SendAsync(message, cancellationToken);
+    }
+
+    public Task SubscribeToTopicAsync(
+        string topic,
+        string registrationToken,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureActive();
+        cancellationToken.ThrowIfCancellationRequested();
+        return FirebaseMessaging.DefaultInstance.SubscribeToTopicAsync(
+            [registrationToken],
+            topic);
+    }
+
+    public Task UnsubscribeFromTopicAsync(
+        string topic,
+        string registrationToken,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureActive();
+        cancellationToken.ThrowIfCancellationRequested();
+        return FirebaseMessaging.DefaultInstance.UnsubscribeFromTopicAsync(
+            [registrationToken],
+            topic);
     }
 
     private bool TryEnsureFirebaseApp(FirebaseNotificationOptions config)
@@ -97,14 +150,36 @@ public sealed class FirebaseNotificationSender : IFirebaseNotificationSender
         }
     }
 
-    private static bool HasRequiredKeys(FirebaseNotificationOptions config) =>
-        !string.IsNullOrWhiteSpace(config.ProjectId)
-        && !string.IsNullOrWhiteSpace(config.PrivateKey)
-        && !string.IsNullOrWhiteSpace(config.ClientEmail);
-
     private static string NormalizePrivateKey(string privateKey) =>
         privateKey.Replace("\\n", "\n", StringComparison.Ordinal);
 
     private static string BuildClientCertUrl(string clientEmail) =>
         $"https://www.googleapis.com/robot/v1/metadata/x509/{Uri.EscapeDataString(clientEmail)}";
+
+    private void EnsureActive()
+    {
+        if (!_active)
+            throw new InvalidOperationException("Firebase notifications are not configured.");
+    }
+
+    private string? BuildAbsoluteLink(string? link)
+    {
+        if (string.IsNullOrWhiteSpace(link) || string.IsNullOrWhiteSpace(_config.WebAppUrl))
+            return null;
+
+        return new Uri(new Uri(_config.WebAppUrl.TrimEnd('/') + "/", UriKind.Absolute), link.TrimStart('/')).ToString();
+    }
+
+    private static Dictionary<string, string> BuildData(string? link)
+    {
+        var data = new Dictionary<string, string>
+        {
+            ["icon"] = "/icons/icon-192.png"
+        };
+
+        if (!string.IsNullOrWhiteSpace(link))
+            data["link"] = link;
+
+        return data;
+    }
 }

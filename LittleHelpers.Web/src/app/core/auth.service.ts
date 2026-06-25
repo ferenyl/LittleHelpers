@@ -19,10 +19,22 @@ export interface MenuItemDto {
   route: string;
 }
 
+export interface AuthSessionContext {
+  token: string;
+  username: string | null;
+  userLevel: string | null;
+}
+
+export interface AuthSessionObserver {
+  afterLogin?(context: AuthSessionContext): void | Promise<void>;
+  beforeLogout?(context: AuthSessionContext): void | Promise<void>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly tokenKey = 'lh_token';
   private readonly userIdClaim = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier';
+  private readonly sessionObservers = new Set<AuthSessionObserver>();
 
   private _token = signal<string | null>(localStorage.getItem(this.tokenKey));
   private _username = signal<string | null>(localStorage.getItem('lh_username'));
@@ -39,6 +51,10 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, { username, password }).pipe(
       tap(res => {
         this.setSession(res.token, res.username, res.userLevel);
+        const session = this.getSessionContext();
+        if (session) {
+          void this.notifyObservers('afterLogin', session);
+        }
       })
     );
   }
@@ -51,7 +67,12 @@ export class AuthService {
     );
   }
 
-  logout() {
+  async logout() {
+    const session = this.getSessionContext();
+    if (session) {
+      await this.notifyObservers('beforeLogout', session);
+    }
+
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem('lh_username');
     localStorage.removeItem('lh_userlevel');
@@ -63,6 +84,11 @@ export class AuthService {
 
   getMenu() {
     return this.http.get<MenuItemDto[]>(`${environment.apiUrl}/menu`);
+  }
+
+  registerSessionObserver(observer: AuthSessionObserver) {
+    this.sessionObservers.add(observer);
+    return () => this.sessionObservers.delete(observer);
   }
 
   private setSession(token: string, username: string | null, userLevel: string | null) {
@@ -96,6 +122,35 @@ export class AuthService {
       return typeof userId === 'string' && userId.length > 0 ? userId : null;
     } catch {
       return null;
+    }
+  }
+
+  private getSessionContext(): AuthSessionContext | null {
+    const token = this._token();
+    if (!token) {
+      return null;
+    }
+
+    return {
+      token,
+      username: this._username(),
+      userLevel: this._userLevel(),
+    };
+  }
+
+  private async notifyObservers(
+    hook: keyof AuthSessionObserver,
+    context: AuthSessionContext
+  ) {
+    const pending = [...this.sessionObservers]
+      .map(observer => observer[hook]?.(context))
+      .filter((result): result is void | Promise<void> => result !== undefined);
+
+    const results = await Promise.allSettled(pending);
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        console.error('Auth session observer failed.', result.reason);
+      }
     }
   }
 }

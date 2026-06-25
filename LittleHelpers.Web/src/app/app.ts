@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { TranslocoModule } from '@jsverse/transloco';
 import { AuthService, MenuItemDto } from './core/auth.service';
+import { PushNotificationsService } from './core/push-notifications.service';
 import { ThemeService, Theme } from './core/theme.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { ThemeService, Theme } from './core/theme.service';
 export class App {
   auth = inject(AuthService);
   themeService = inject(ThemeService);
+  private pushNotifications = inject(PushNotificationsService);
   private document = inject(DOCUMENT);
   private router = inject(Router);
 

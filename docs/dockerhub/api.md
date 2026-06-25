@@ -20,6 +20,13 @@ docker run -d \
   -e FirebaseNotifications__PrivateKey="" \
   -e FirebaseNotifications__ClientEmail="" \
   -e FirebaseNotifications__ClientId="" \
+  -e FirebaseNotifications__WebAppUrl="" \
+  -e FirebaseNotifications__WebApiKey="" \
+  -e FirebaseNotifications__WebAuthDomain="" \
+  -e FirebaseNotifications__WebStorageBucket="" \
+  -e FirebaseNotifications__WebMessagingSenderId="" \
+  -e FirebaseNotifications__WebAppId="" \
+  -e FirebaseNotifications__WebVapidKey="" \
   -e ConnectionStrings__littlehelpers="Host=db;Port=5432;Username=littlehelpers;Password=secret;Database=littlehelpers" \
   ferenyl/littlehelpers.api:latest
 ```
@@ -44,8 +51,19 @@ A running PostgreSQL instance is required. See [docker-compose](#docker-compose)
 | `FirebaseNotifications__PrivateKey` | ❌ | Firebase service account private key, use `\n` for new lines |
 | `FirebaseNotifications__ClientEmail` | ❌ | Firebase service account client email |
 | `FirebaseNotifications__ClientId` | ❌ | Firebase service account client id |
+| `FirebaseNotifications__WebAppUrl` | ❌ | Public web app URL used as notification click target, e.g. `https://littlehelpers.example.com` |
+| `FirebaseNotifications__WebApiKey` | ❌ | Firebase Web app API key (required for browser push notifications) |
+| `FirebaseNotifications__WebAuthDomain` | ❌ | Firebase Web app auth domain |
+| `FirebaseNotifications__WebStorageBucket` | ❌ | Firebase Web app storage bucket |
+| `FirebaseNotifications__WebMessagingSenderId` | ❌ | Firebase Web app messaging sender id |
+| `FirebaseNotifications__WebAppId` | ❌ | Firebase Web app app id |
+| `FirebaseNotifications__WebVapidKey` | ❌ | Firebase Web Push certificate public key (VAPID) |
 
 > Generate a strong JWT key: `openssl rand -base64 48`
+
+## Browser push notifications
+
+To send push notifications to the web client, configure both the Firebase service account fields and the Firebase Web app fields above, then serve the web frontend over HTTPS. The API exposes the public web config at `/notifications/web-config` and subscribes logged-in browsers to the correct Firebase topic.
 
 ## Default admin account
 
@@ -99,6 +117,13 @@ services:
       FirebaseNotifications__PrivateKey: ""
       FirebaseNotifications__ClientEmail: ""
       FirebaseNotifications__ClientId: ""
+      FirebaseNotifications__WebAppUrl: ""
+      FirebaseNotifications__WebApiKey: ""
+      FirebaseNotifications__WebAuthDomain: ""
+      FirebaseNotifications__WebStorageBucket: ""
+      FirebaseNotifications__WebMessagingSenderId: ""
+      FirebaseNotifications__WebAppId: ""
+      FirebaseNotifications__WebVapidKey: ""
     depends_on:
       - db
 ```

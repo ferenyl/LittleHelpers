@@ -19,6 +19,16 @@ The `API_URL` is injected into the nginx config at container startup via `envsub
 |---|---|---|---|
 | `API_URL` | ✅ | – | Base URL of the API service, e.g. `http://api` |
 
+## Browser push notifications
+
+Web push notifications are configured through the API, not the web container. To enable them:
+
+1. Configure the API container's `FirebaseNotifications__*` service account fields.
+2. Configure the API container's `FirebaseNotifications__Web*` fields and VAPID key.
+3. Serve the web app over **HTTPS** in production.
+
+The web client fetches the public Firebase config from `/api/notifications/web-config`, registers `firebase-messaging-sw.js`, and subscribes the logged-in browser after permission is granted.
+
 ## Ports
 
 | Port | Protocol | Description |

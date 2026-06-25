@@ -37,6 +37,11 @@
                       <!-- Recent events -->
                       <div class="col-md-6">
                         <h6 class="fw-semibold mb-2">{{ 'children.events.heading' | transloco }}</h6>
+                        @if (data.periodStart && data.periodEnd) {
+                          <div class="text-muted small mb-2">
+                            {{ 'childDetail.cycleRange' | transloco }}: {{ data.periodStart | date:'d MMM' }} – {{ data.periodEnd | date:'d MMM' }}
+                          </div>
+                        }
                         @if (data.logs.length === 0) {
                           <p class="text-muted small">{{ 'children.events.empty' | transloco }}</p>
                         } @else {
@@ -58,6 +63,11 @@
                       <!-- Chart -->
                       <div class="col-md-6">
                         <h6 class="fw-semibold mb-2">{{ 'children.chart.heading' | transloco }}</h6>
+                        @if (data.periodStart && data.periodEnd) {
+                          <div class="text-muted small mb-2">
+                            {{ 'childDetail.cycleRange' | transloco }}: {{ data.periodStart | date:'d MMM' }} – {{ data.periodEnd | date:'d MMM' }}
+                          </div>
+                        }
                         <svg class="w-100" viewBox="0 0 600 120" preserveAspectRatio="none">
                           <line x1="40" y1="80" x2="580" y2="80" stroke="#dee2e6" stroke-width="1"/>
                           <line x1="40" y1="20" x2="40" y2="80" stroke="#dee2e6" stroke-width="1"/>
