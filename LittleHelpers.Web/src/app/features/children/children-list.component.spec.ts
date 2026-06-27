@@ -85,13 +85,14 @@ describe('ChildrenListComponent', () => {
     vi.spyOn(svc, 'getById').mockReturnValue(of({ ...makeChild(), assignedChores: [] }));
     vi.spyOn(svc, 'getLogs').mockReturnValue(of({
       logs: [],
-      periodStartInclusive: new Date('2026-05-27T00:00:00.000Z').toISOString(),
-      periodEndExclusive: new Date('2026-06-27T00:00:00.000Z').toISOString(),
+      periodStartInclusive: new Date('2026-06-27T00:00:00.000Z').toISOString(),
+      periodEndExclusive: new Date('2026-07-27T00:00:00.000Z').toISOString(),
     }));
 
     const child = makeChild();
     cmp.toggle(child);
     expect(cmp.expandedId()).toBe(1);
+    expect(svc.getLogs).toHaveBeenCalledWith(1);
 
     cmp.toggle(child);
     expect(cmp.expandedId()).toBeNull();

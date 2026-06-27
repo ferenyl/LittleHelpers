@@ -245,8 +245,10 @@ public class ChildrenApiTests : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var period = await response.Content.ReadFromJsonAsync<ChoreLogPeriodDto>(cancellationToken);
-        Assert.All(period!.Logs, l => Assert.Equal(2025, l.Timestamp.Year));
-        Assert.All(period.Logs, l => Assert.Equal(1, l.Timestamp.Month));
+        Assert.Single(period!.Logs);
+        Assert.Equal("Feb chore", period.Logs[0].ChoreName);
+        Assert.Equal(new DateTimeOffset(2025, 1, 27, 0, 0, 0, TimeSpan.Zero), period.PeriodStartInclusive);
+        Assert.Equal(new DateTimeOffset(2025, 2, 27, 0, 0, 0, TimeSpan.Zero), period.PeriodEndExclusive);
     }
 
     [Fact]

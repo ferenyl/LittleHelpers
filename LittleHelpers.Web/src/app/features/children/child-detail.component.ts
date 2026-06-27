@@ -41,7 +41,7 @@ export class ChildDetailComponent implements OnInit, OnDestroy {
   pendingConfirmation = signal<ChoreConfirmation | null>(null);
   pendingHistoryDelete = signal<HistoryDeleteConfirmation | null>(null);
 
-  now = new Date();
+  private now = new Date();
   year = signal(this.now.getFullYear());
   month = signal(this.now.getMonth() + 1);
 
@@ -150,7 +150,7 @@ export class ChildDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadChild(true);
-    this.loadLogs();
+    this.loadLogs(true);
     this.realtime.trackChild(this.childId);
     this.realtime.childUpdates$
       .pipe(
@@ -184,12 +184,18 @@ export class ChildDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadLogs() {
-    this.childSvc.getLogs(this.childId, this.year(), this.month()).subscribe(period => {
+  loadLogs(useCurrentPeriod = false) {
+    const request = useCurrentPeriod
+      ? this.childSvc.getLogs(this.childId)
+      : this.childSvc.getLogs(this.childId, this.year(), this.month());
+
+    request.subscribe(period => {
       this.logs.set(period.logs);
       const start = new Date(period.periodStartInclusive);
       const endExclusive = new Date(period.periodEndExclusive);
       const end = new Date(endExclusive.getTime() - (24 * 60 * 60 * 1000));
+      this.year.set(start.getUTCFullYear());
+      this.month.set(start.getUTCMonth() + 1);
       this.periodStart.set(start);
       this.periodEnd.set(end);
     });

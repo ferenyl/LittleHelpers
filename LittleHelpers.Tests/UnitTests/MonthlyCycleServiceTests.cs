@@ -36,14 +36,14 @@ public class MonthlyCycleServiceTests
     }
 
     [Fact]
-    public void GetPeriodForMonth_UsesDisplayMonthWithConfiguredBreakpoint()
+    public void GetPeriodForMonth_UsesStartMonthWithConfiguredBreakpoint()
     {
         var service = CreateService(27);
 
         var period = service.GetPeriodForMonth(2026, 6);
 
-        Assert.Equal(new DateTimeOffset(2026, 5, 27, 0, 0, 0, TimeSpan.Zero), period.StartInclusive);
-        Assert.Equal(new DateTimeOffset(2026, 6, 27, 0, 0, 0, TimeSpan.Zero), period.EndExclusive);
+        Assert.Equal(new DateTimeOffset(2026, 6, 27, 0, 0, 0, TimeSpan.Zero), period.StartInclusive);
+        Assert.Equal(new DateTimeOffset(2026, 7, 27, 0, 0, 0, TimeSpan.Zero), period.EndExclusive);
         Assert.Equal(2026, period.Year);
         Assert.Equal(6, period.Month);
     }
@@ -58,22 +58,22 @@ public class MonthlyCycleServiceTests
     }
 
     [Fact]
-    public void GetPeriodForMonth_Breakpoint31_FallsBackToLastDayInFebruary()
+    public void GetPeriodForMonth_Breakpoint31_FallsBackToLastDayInStartMonth()
     {
         var service = CreateService(31);
 
-        var period = service.GetPeriodForMonth(2026, 3);
+        var period = service.GetPeriodForMonth(2026, 2);
 
         Assert.Equal(new DateTimeOffset(2026, 2, 28, 0, 0, 0, TimeSpan.Zero), period.StartInclusive);
         Assert.Equal(new DateTimeOffset(2026, 3, 31, 0, 0, 0, TimeSpan.Zero), period.EndExclusive);
     }
 
     [Fact]
-    public void GetPeriodForMonth_Breakpoint31_FallsBackToLeapDayInLeapYear()
+    public void GetPeriodForMonth_Breakpoint31_FallsBackToLeapDayInStartMonth()
     {
         var service = CreateService(31);
 
-        var period = service.GetPeriodForMonth(2028, 3);
+        var period = service.GetPeriodForMonth(2028, 2);
 
         Assert.Equal(new DateTimeOffset(2028, 2, 29, 0, 0, 0, TimeSpan.Zero), period.StartInclusive);
         Assert.Equal(new DateTimeOffset(2028, 3, 31, 0, 0, 0, TimeSpan.Zero), period.EndExclusive);

@@ -121,10 +121,9 @@ export class ChildrenListComponent implements OnInit {
       loading: true,
     });
 
-    const now = new Date();
     forkJoin({
       detail: this.svc.getById(childId),
-      logs: this.svc.getLogs(childId, now.getFullYear(), now.getMonth() + 1),
+      logs: this.svc.getLogs(childId),
     }).subscribe({
       next: ({ detail, logs: period }) => {
         const parentChores = detail.assignedChores.filter(c => !c.assignedUserIds.includes(childId));
@@ -138,15 +137,16 @@ export class ChildrenListComponent implements OnInit {
           parentChores,
           completing: null,
           loading: false,
-          ...this.buildChart(period.logs, now),
+          ...this.buildChart(period.logs, start),
         });
       },
       error: () => this.patchExpanded(childId, { loading: false }),
     });
   }
 
-  private buildChart(logs: ChoreLogDto[], now: Date): { svgPath: string; chartAxis: ChartAxis } {
-    const year = now.getFullYear(), month = now.getMonth() + 1;
+  private buildChart(logs: ChoreLogDto[], periodStart: Date): { svgPath: string; chartAxis: ChartAxis } {
+    const year = periodStart.getUTCFullYear();
+    const month = periodStart.getUTCMonth() + 1;
     const daysInMonth = new Date(year, month, 0).getDate();
     const byDay: Record<number, number> = {};
     for (const log of logs) { const d = new Date(log.timestamp).getDate(); byDay[d] = (byDay[d] ?? 0) + log.points; }

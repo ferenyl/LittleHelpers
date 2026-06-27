@@ -38,9 +38,13 @@ export class ChildrenService {
   getAll() { return this.http.get<ChildSummaryDto[]>(this.base); }
   getById(id: number) { return this.http.get<ChildSummaryDto>(`${this.base}/${id}`); }
 
-  getLogs(childId: number, year: number, month: number) {
+  getLogs(childId: number, year?: number, month?: number) {
+    const query = year !== undefined && month !== undefined
+      ? `?year=${year}&month=${month}`
+      : '';
+
     return this.http.get<ChoreLogPeriodDto>(
-      `${environment.apiUrl}/chorelog/${childId}?year=${year}&month=${month}`
+      `${environment.apiUrl}/chorelog/${childId}${query}`
     );
   }
 
