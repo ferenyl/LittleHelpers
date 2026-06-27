@@ -54,23 +54,48 @@ LittleHelpers.sln
 
 ### First-time setup
 
-The API requires a JWT signing key and a seed admin password. These must be set in `appsettings.Development.json` (gitignored). Create the file in `LittleHelpers.ApiService/`:
+The committed `LittleHelpers.ApiService/appsettings.json` now lists every supported API setting and keeps sensitive values blank. For local development, create `LittleHelpers.ApiService/appsettings.Development.json` (gitignored) and override the sensitive values you need:
 
 ```json
 {
+  "ConnectionStrings": {
+    "littlehelpers": "Host=localhost;Port=5432;Username=littlehelpers;Password=CHANGE_ME;Database=littlehelpers"
+  },
   "Jwt": {
     "Key": "your-secret-key-min-32-characters-long",
+    "Issuer": "littlehelpers-api",
+    "Audience": "littlehelpers-client",
     "AccessTokenLifetimeHours": 168,
     "RenewTokenLifetimeHours": 336
   },
   "SeedAdminPassword": "YourAdminPassword123!",
   "MonthlyCycle": {
-    "BreakpointDay": 1
+    "BreakpointDay": 27
   }
 }
 ```
 
 > **Tip:** Generate a strong key with `openssl rand -base64 48`
+
+### Supported API appsettings keys
+
+These are the properties currently read by the API from `appsettings*.json` / environment variables:
+
+| Property | Default in committed `appsettings.json` | Notes |
+|---|---|---|
+| `Logging:LogLevel:Default` | `Information` | Baseline application log level |
+| `Logging:LogLevel:Microsoft.AspNetCore` | `Warning` | Reduces ASP.NET Core framework log noise |
+| `AllowedHosts` | `*` | Standard ASP.NET Core host filtering |
+| `ConnectionStrings:littlehelpers` | _(empty)_ | PostgreSQL connection string; usually injected by Aspire or set explicitly outside Aspire |
+| `Jwt:Key` | _(empty)_ | Required secret, minimum 32 characters |
+| `Jwt:Issuer` | `littlehelpers-api` | Used both when issuing and validating JWTs |
+| `Jwt:Audience` | `littlehelpers-client` | Used both when issuing and validating JWTs |
+| `Jwt:AccessTokenLifetimeHours` | `168` | Access token lifetime in hours |
+| `Jwt:RenewTokenLifetimeHours` | `336` | Renewed token lifetime in hours |
+| `SeedAdminPassword` | _(empty)_ | Required on first startup when the database has no users |
+| `MonthlyCycle:BreakpointDay` | `27` | Day of month when a new allowance cycle starts |
+
+`Jwt:AccessTokenLifetimeHours` and `Jwt:RenewTokenLifetimeHours` also fall back to `168` and `336` in code if omitted. `MonthlyCycle:BreakpointDay` validates `1-31`; if the setting is omitted entirely, the code fallback is `1`.
 
 ### Start the application
 
