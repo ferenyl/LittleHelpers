@@ -1,21 +1,21 @@
 <Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>12f9fffb-416f-4cbe-9f95-0d9b512c5bf9</UserSecretsId>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <UserSecretsId>12f9fffb-416f-4cbe-9f95-0d9b512c5bf9</UserSecretsId>
-  </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\LittleHelpers.ApiService\LittleHelpers.ApiService.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LittleHelpers.ApiService\LittleHelpers.ApiService.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Docker" Version="13.5.4" />
-    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.5.4" />
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.5.4" />
-  </ItemGroup>
-
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.Docker" Version="13.5.4" />
+        <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.5.4" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.5.4" />
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+    </ItemGroup>
 </Project>
