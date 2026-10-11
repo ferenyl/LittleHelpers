@@ -13,7 +13,7 @@ public sealed class ChoreAvailabilityService : IChoreAvailabilityService
     public string? GetBlockReason(Chore chore, IReadOnlyList<ChoreLog> logs, DateTimeOffset now)
     {
         var today = now.Date;
-        var weekStart = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+        var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
         var choreLogs = logs.Where(l => l.ChoreId == chore.Id).OrderByDescending(l => l.Timestamp).ToList();
 
         if (chore.MaxTimesPerDay.HasValue)
