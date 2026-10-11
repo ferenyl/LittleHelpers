@@ -13,6 +13,8 @@ updates:
     directory: "/LittleHelpers.Web"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "typescript"
     groups:
       npm-all:
         patterns:
