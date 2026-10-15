@@ -10,6 +10,9 @@ updates:
     groups:
       nuget:
         patterns: ["*"]
+      nuget-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/LittleHelpers.Web"
@@ -23,6 +26,9 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -33,6 +39,9 @@ updates:
       timezone: Europe/Stockholm
     groups:
       docker:
+        patterns: ["*"]
+      docker-security:
+        applies-to: security-updates
         patterns: ["*"]
 
   - package-ecosystem: "docker-compose"
@@ -45,6 +54,9 @@ updates:
     groups:
       docker-compose:
         patterns: ["*"]
+      docker-compose-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -55,4 +67,7 @@ updates:
       timezone: Europe/Stockholm
     groups:
       github-actions:
+        patterns: ["*"]
+      github-actions-security:
+        applies-to: security-updates
         patterns: ["*"]
