@@ -3,46 +3,56 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: wednesday
+      time: "05:00"
+      timezone: Europe/Stockholm
     groups:
-      dotnet-all:
-        patterns:
-          - "*"
+      nuget:
+        patterns: ["*"]
 
   - package-ecosystem: "npm"
     directory: "/LittleHelpers.Web"
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: wednesday
+      time: "05:00"
+      timezone: Europe/Stockholm
     ignore:
       - dependency-name: "typescript"
     groups:
-      npm-all:
-        patterns:
-          - "*"
+      npm:
+        patterns: ["*"]
 
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: wednesday
+      time: "05:00"
+      timezone: Europe/Stockholm
     groups:
-      docker-all:
-        patterns:
-          - "*"
+      docker:
+        patterns: ["*"]
 
   - package-ecosystem: "docker-compose"
     directory: "/docs/compose"
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: wednesday
+      time: "05:00"
+      timezone: Europe/Stockholm
     groups:
-      compose-all:
-        patterns:
-          - "*"
+      docker-compose:
+        patterns: ["*"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: weekly
+      day: wednesday
+      time: "05:00"
+      timezone: Europe/Stockholm
     groups:
-      actions-all:
-        patterns:
-          - "*"
+      github-actions:
+        patterns: ["*"]
