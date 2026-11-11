@@ -1,5 +1,5 @@
 # Stage 1: Restore – separerat lager för NuGet-cache
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS restore
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS restore
 WORKDIR /src
 COPY LittleHelpers.ServiceDefaults/LittleHelpers.ServiceDefaults.csproj LittleHelpers.ServiceDefaults/
 COPY LittleHelpers.ApiService/LittleHelpers.ApiService.csproj LittleHelpers.ApiService/
@@ -15,7 +15,7 @@ RUN dotnet publish LittleHelpers.ApiService/LittleHelpers.ApiService.csproj \
  /p:UseAppHost=false
 
 # Stage 3: Runtime – minimal ASP.NET-image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS runtime
 WORKDIR /app
 
 # Kör som icke-root
